@@ -33,5 +33,5 @@ npx tsx .\engine\cli.ts YOUR_API_KEY C:/directory/
 tsc ./engine/cli.ts --outDir ./out_engine
 ```
 ```
- node .\out_engine\engine\cli.js YOUR_API_KEY C:/directory/
- ```
+node .\out_engine\engine\cli.js YOUR_API_KEY C:/directory/
+```
