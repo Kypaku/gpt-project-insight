@@ -2,13 +2,14 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
-    "strict": true,
+    "strict": false,
     "jsx": "preserve",
     "importHelpers": true,
     "moduleResolution": "node",
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "noStrictGenericChecks": true,
     "sourceMap": true,
     "baseUrl": ".",
     "types": [
@@ -34,6 +35,7 @@
     "tests/**/*.tsx"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "helpers/node_gm.js"
   ]
 }
