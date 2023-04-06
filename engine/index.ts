@@ -2,19 +2,17 @@ import { getFileDescription, getFolderDescription, gptAPI } from "./api"
 import * as path from 'path'
 import { isDirectory, readFile, readFileJSON, sleep, writeFileJSON } from "../helpers/node_gm"
 import { IFile } from "../types"
-
-const rootDirOrSelectedFile = process.argv[3]
-const maxQueries = process.argv[4]
+import { getParentFolders } from "../helpers"
 
 const maxTokens = 4097
-const bytesPerToken = 4 
+const bytesPerToken = 4
 
 export class DocumentationGenerator {
     private files: IFile[];
-    private opts: { maxQueries?: number; noCmd?: boolean; apiKey?: string };
+    private opts: { maxQueries?: number; apiKey?: string, cli?: boolean };
     private isStopped: boolean;
 
-    constructor(files: IFile[], opts?: { maxQueries?: number; noCmd?: boolean; apiKey?: string }) {
+    constructor(files: IFile[], opts?: { maxQueries?: number; apiKey?: string, cli?: boolean }) {
         this.files = files
         this.opts = opts || {}
         this.isStopped = false
@@ -25,6 +23,10 @@ export class DocumentationGenerator {
         if (this.opts.apiKey) {
             gptAPI.setApiKey(this.opts.apiKey)
         }
+        if (this.opts.cli) {
+            const parentFolders = getParentFolders(this.files.map(file => file.path)).filter((pathOne) => this.files.find((file) => file.path === pathOne) === undefined)
+            this.files.push(...parentFolders.map(folder => ({ path: folder })))
+        }
 
         const queryFn = async (file: IFile) => {
             try {
@@ -32,6 +34,7 @@ export class DocumentationGenerator {
                 let res = {} as any
                 if (file.fullPath) {
                     file.promise = getFileDescription(file, readFile(file.fullPath) || '')
+                    this.opts?.cli && console.log("start: " + file.fullPath)
                     res = await file.promise
                 } else {
                     const children = this.files.filter(res => ((res.path && res.path.startsWith(file.path)) || file.path === ".") && res.path !== file.path && !res.used)
@@ -43,6 +46,7 @@ export class DocumentationGenerator {
                     }
                     const childrenWithDescriptions = children.filter(res => (res.description || res.state === 'error') && !res.used)
                     const descriptions = childrenWithDescriptions.map((pathOne) => ({ fileName: pathOne.path, description: (pathOne.description || `Size: ${pathOne.size} bytes`) || '' }))
+                    this.opts?.cli && console.log("start folder: " + file.path)
                     file.promise = getFolderDescription(file, descriptions,)
                     childrenWithDescriptions.forEach((pathOne) => {
                         pathOne.used = true
@@ -53,7 +57,7 @@ export class DocumentationGenerator {
                 file.prompt = res.prompt
                 file.state = 'done'
             } catch (e) {
-                console.error('catch', { e })
+                console.error('catch', file.path, e.message)
                 file.state = 'error'
             }
         }
@@ -65,12 +69,7 @@ export class DocumentationGenerator {
 
         await this.semaphore(this.files, queryFn, this.opts.maxQueries || 5)
 
-        if (!this.opts.noCmd) {
-            writeFileJSON(path.resolve(__dirname, '../data/res.json'), this.files)
-            process.exit(-1)
-        } else {
-            return this.files
-        }
+        return this.files
     }
 
     public stop(): void {
@@ -118,46 +117,3 @@ export class DocumentationGenerator {
         })
     }
 }
-
-// export async function recursiveDocumentation(filesArr: IFile[], opts?: { maxQueries?: number, noCmd?: boolean, apiKey?: string }) {
-//     if (opts?.apiKey) {
-//         gptAPI.setApiKey(opts.apiKey)
-//     }
-//     // const files = isDirectory(rootDirOrSelectedFile) ? getFilesInDirectory(rootDirOrSelectedFile, rootDirOrSelectedFile) : readFileJSON(rootDirOrSelectedFile)
-//     const files = filesArr
-//     const results = [] as any[]
-//     const currentIndex = 0
-
-//     const queryFn = async (file: IFile) => {
-//         try {
-//             file.state = 'pending'
-//             if (file.fullPath) {
-//                 file.description = await getFileDescription(file.path, readFile(file.fullPath) || '')
-//             } else {
-//                 file.description = await getFolderDescription(file.path, files.filter(res => res.path && res.path.startsWith(file.path)).map((pathOne) => ({ fileName: pathOne.path, description: pathOne.description || '' })))
-//             }
-//             file.state = 'done'
-//         } catch (e) {
-//             console.error("catch", {e})
-//             file.state = 'error'
-//         }
-//     }
-
-//     const beforeEnd = () => {
-//         const parentFolders = getParentFolders(files.map(file => file.path)).filter((pathOne) => files.find((file) => file.path === pathOne) === undefined)
-//         files.push(...parentFolders.map(folder => ({ path: folder })))
-//     }
-
-//     await semaphore(files, queryFn, opts?.maxQueries || 5, beforeEnd)
-
-//     if (!opts?.noCmd) {
-//         writeFileJSON(path.resolve(__dirname, "../data/res.json"), results)
-//         process.exit(-1)
-//     } else {
-//         return files
-//     }
-// }
-
-// recursiveDocumentation(rootDirOrSelectedFile)
-
-setTimeout(() => 9999999)

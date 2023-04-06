@@ -31,14 +31,14 @@
         <div class="footer flex items-center mt-6 px-2 py-1">
             <button class="p-1 bg-gray-200 mr-2 rounded" @click="reload">Reload</button>
             <button class="p-1 bg-gray-200 mr-2 rounded" @click="openLink('https://platform.openai.com/account/usage')">OpenAI Page</button>
-            <!-- <button class="p-1 bg-gray-200 mr-2 rounded" @click="openLink()">Repo</button> -->
+            <button class="p-1 bg-gray-200 mr-2 rounded" @click="openLink('https://github.com/Kypaku/gpt-files-documentation')">Repo</button>
             <button class="p-1 bg-gray-200 mr-2 rounded" @click="clearCache">Clear Cache</button>
         </div>
     </div>
 </template>
 
 <script lang="ts">
-    import { debounce } from 'lodash'
+        import {debounce, size} from 'lodash'
     import { defineComponent } from 'vue'
     import InputText from './components/misc/InputText.vue'
     import ls from 'local-storage'
@@ -113,7 +113,7 @@
 
             save() {
                 this.saved = false
-                writeFileJSON(path.resolve(this.dir, "./docs.ai.json"), this.$refs.files.selectedFiles)
+                writeFileJSON(path.resolve(this.dir, "./docs.ai.json"), this.$refs.files.selectedFiles.map((selectedFile) => ({path: selectedFile.path, description: selectedFile.description, size: selectedFile.size})))
                 console.log("save", { resFile })
                 this.saved = true
             },
@@ -158,7 +158,6 @@
                         const options = {
                             apiKey: this.apiKey,
                             maxQueries: this.maxQueries,
-                            noCmd: true,
                         }
                         this.filesArr = [...this.$refs.files.selectedFiles]
                         this.generator = new DocumentationGenerator(this.filesArr, options)

@@ -1,7 +1,7 @@
 import SimpleAPI from 'gpt-simple-api-ts'
 import { IFile } from '../types'
 
-export const gptAPI = new SimpleAPI({ key: process.argv[2] })
+export const gptAPI = new SimpleAPI({ key: '' })
 
 export interface IFileDescription {
     fileName: string
