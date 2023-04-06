@@ -1,6 +1,6 @@
 # Recursive documentation generator
 
-You need an API Key to make requests to (Open AI API)[https://platform.openai.com/]
+You need an API Key to make requests to (https://platform.openai.com/)[Open AI API]
 
 ## How it works
 
