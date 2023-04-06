@@ -4,7 +4,7 @@
         <div class="main flex flex-col items-start px-4 mt-4">
             <InputText class="mb-2" v-model:value="apiKey" label="API Key" @update:value="val => ls('apiKey', val)"  />
             <div class="flex items-center mb-4">
-                <InputText v-model:value="dir" label="Project directory" @update:value="updateFiles"  />
+                <InputText v-model:value="dir" placeholder="C:/Projects/sample-app/src" label="Project directory" @update:value="updateFiles"  />
                 <button @click="selectFolder" class="btn-select bg-gray-100 mt-6" ><IconFolder/></button>
                 <button v-if="dir" @click="openFile(dir)" class="p-1 bg-gray-100 mt-6 text-sm ml-2">Open in Explorer</button>
             </div>
