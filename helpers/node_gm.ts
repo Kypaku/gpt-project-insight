@@ -1,4 +1,4 @@
-import _, { groupBy } from 'lodash'
+import * as _ from 'lodash'
 import * as fs from 'fs'
 import * as readline from 'readline'
 import * as path from 'path'
