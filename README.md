@@ -1,4 +1,4 @@
-# recursive-documentation
+# Recursive documentation generator
 
 ## Project setup
 ```
