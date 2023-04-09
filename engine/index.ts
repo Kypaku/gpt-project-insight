@@ -4,15 +4,24 @@ import { isDirectory, readFile, readFileJSON, sleep, writeFileJSON } from "../he
 import { IFile } from "../types"
 import { getParentFolders } from "../helpers"
 
-const maxTokens = 4097
-const bytesPerToken = 4
+export interface DocumentationGeneratorOptions {
+    maxQueries?: number
+    apiKey?: string
+    cli?: boolean
+    maxTokens?: number
+    maxTokensFile?: number
+    maxTokensDir?: number
+    bytesPerToken?: number
+    temperature?: number
+    model?: string
+} 
 
 export class DocumentationGenerator {
     private files: IFile[];
-    private opts: { maxQueries?: number; apiKey?: string, cli?: boolean };
+    private opts: DocumentationGeneratorOptions;
     private isStopped: boolean;
 
-    constructor(files: IFile[], opts?: { maxQueries?: number; apiKey?: string, cli?: boolean }) {
+    constructor(files: IFile[], opts?: DocumentationGeneratorOptions) {
         this.files = files
         this.opts = opts || {}
         this.isStopped = false
@@ -33,8 +42,9 @@ export class DocumentationGenerator {
                 file.state = 'pending'
                 let res = {} as any
                 if (file.fullPath) {
-                    file.promise = getFileDescription(file, readFile(file.fullPath) || '')
-                    this.opts?.cli && console.log("start: " + file.fullPath)
+                    const fileOpts = { maxTokens: this.opts.maxTokensFile, temperature: this.opts.temperature, model: this.opts.model }
+                    file.promise = getFileDescription(file, readFile(file.fullPath) || '', fileOpts)
+                    this.opts?.cli && console.log("start: " + file.fullPath, {fileOpts})
                     res = await file.promise
                 } else {
                     const children = this.files.filter(res => ((res.path && res.path.startsWith(file.path)) || file.path === ".") && res.path !== file.path && !res.used)
@@ -46,8 +56,9 @@ export class DocumentationGenerator {
                     }
                     const childrenWithDescriptions = children.filter(res => (res.description || res.state === 'error') && !res.used)
                     const descriptions = childrenWithDescriptions.map((pathOne) => ({ fileName: pathOne.path, description: (pathOne.description || `Size: ${pathOne.size} bytes`) || '' }))
-                    this.opts?.cli && console.log("start folder: " + file.path)
-                    file.promise = getFolderDescription(file, descriptions,)
+                    const dirOpts = { maxTokens: this.opts.maxTokensDir, temperature: this.opts.temperature, model: this.opts.model }
+                    this.opts?.cli && console.log("start folder: " + file.path, {dirOpts})
+                    file.promise = getFolderDescription(file, descriptions, dirOpts)
                     childrenWithDescriptions.forEach((pathOne) => {
                         pathOne.used = true
                     })

@@ -22,23 +22,31 @@ const timeoutPromise = (timeout) => {
     })
 }
 
-export const getFileDescription = async (file: IFile, content: string): Promise<DescriptionResponse> => {
+export const getFileDescription = async (file: IFile, content: string, opts?: any): Promise<DescriptionResponse> => {
     const prompt = `Create a short description for the file ${file.path}:
-        ${content}
+    ${content}
     `
-    const gptRequest = gptAPI.getFirst(prompt, { max_tokens: 150, temperature: 0.01 })
+    const gptOpts = { max_tokens: opts?.maxTokens || 150, temperature: opts?.temperature || 0.01 } as any
+    if (opts?.model) {
+        gptOpts.model = opts?.model
+    }
+    const gptRequest = gptAPI.getFirst(prompt, gptOpts)
     const description = (await Promise.race([gptRequest, timeoutPromise(timeout)])) as any || ""
     return { description, prompt }
 }
 
-export const getFolderDescription = async (file: IFile, descriptions: IFileDescription[]): Promise<DescriptionResponse> => {
+export const getFolderDescription = async (file: IFile, descriptions: IFileDescription[], opts?: any): Promise<DescriptionResponse> => {
     const prompt = `I will send you the directory name and files it contains and their's descriptions and you will have to create a short description for the directory:
         Directory name: ${file.path}
         ${descriptions.map(desc => `
         ${desc.fileName}: 
         ${desc.description}`).join("\n")}
     `
-    const gptRequest = gptAPI.getFirst(prompt, { max_tokens: 300, temperature: 0.01 })
+    const gptOpts = { max_tokens: opts?.maxTokens || 300, temperature: opts?.temperature || 0.01 } as any
+    if (opts?.model) {
+        gptOpts.model = opts?.model
+    }
+    const gptRequest = gptAPI.getFirst(prompt, gptOpts)
     const description = await Promise.race([gptRequest, timeoutPromise(timeout)]) as any || ""
     return { description, prompt }
 }

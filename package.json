@@ -14,6 +14,7 @@
   "main": "background.js",
   "dependencies": {
     "autoprefixer": "^9.8.8",
+    "commander": "^10.0.0",
     "core-js": "^3.6.5",
     "gpt-simple-api-ts": "^1.0.17",
     "local-storage": "^2.0.0",
