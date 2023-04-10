@@ -1,10 +1,8 @@
-* [How it works]()
+# Recursive documentation generator
 * [Project setup](#project-setup)
 * [Run Electron app](#run-electron-app)
 * [Generate using CLI](#generate-using-cli)
 * [Config and Settings](#config-and-options)
-
-# Recursive documentation generator
 
 This project generates documentation recursively using the OpenAI API. To use this application, you need to have an API Key for the [Open AI API](https://platform.openai.com/)
 
