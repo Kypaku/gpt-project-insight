@@ -14,6 +14,7 @@ program
     .option('--maxTokensDir <maxTokensDir>', 'The max tokens values for directories')
     .option('--bytesPerToken <bytesPerToken>', 'approximate number of bytes in one token')
     .option('--temperature <temperature>', 'The temperature of the model')
+    .option('--excludes <excludes>', 'The pattern to exclude files. Example: dir1,dir2,file3,*.png')
     .option('--model <model>', 'The model to use')
     .parse(process.argv)
 
@@ -22,9 +23,9 @@ const apiKey = process.argv[2]
 
 async function main(rootDirOrSelectedFile: string) {
     const isDir = isDirectory(rootDirOrSelectedFile)
-    const cliOptions = program.opts();
+    const cliOptions = program.opts()
     const configFile = cliOptions?.config || (isDir ? path.resolve(rootDirOrSelectedFile, "docs.ai.config.json") : path.resolve(__dirname, "docs.ai.config.json"))
-    const config: DocumentationGeneratorOptions & {outFile?: string} = existFile(configFile) ? readFileJSON(configFile) : null
+    const config: DocumentationGeneratorOptions & {outFile?: string, excludes?: string} = existFile(configFile) ? readFileJSON(configFile) : null
 
     const maxQueries = +cliOptions?.maxQueries || config?.maxQueries || 5
     const maxTokens = +cliOptions?.maxTokens || config?.maxTokens || 4097
@@ -33,6 +34,7 @@ async function main(rootDirOrSelectedFile: string) {
     const model = cliOptions?.model || config?.model
     const maxTokensFile = +cliOptions?.maxTokensFile || config?.maxTokensFile
     const maxTokensDir = +cliOptions?.maxTokensDir || config?.maxTokensDir
+    const excludes = cliOptions?.excludes || config?.excludes
 
     const options = {
         maxQueries,
@@ -46,9 +48,28 @@ async function main(rootDirOrSelectedFile: string) {
         maxTokensDir
     }
 
-    console.log("main", {options})
+    // console.log("main", {options})
 
-    const files = isDir ? getFilesInDirectory(rootDirOrSelectedFile, rootDirOrSelectedFile) : readFileJSON(rootDirOrSelectedFile)
+    let files = isDir ? getFilesInDirectory(rootDirOrSelectedFile, rootDirOrSelectedFile) : readFileJSON(rootDirOrSelectedFile)
+    if (excludes) {
+        files = files.filter((file) => {
+            const excludesCondition = excludes
+                .split(",")
+                .map((el) => el.trim())
+                .every((exclude) => {
+                    if (exclude.startsWith("*")) {
+                        if (exclude.endsWith("*")) {
+                            return !file.path.includes(exclude.slice(1, -1))
+                        }
+                        return !file.path.endsWith(exclude.slice(1))
+                    } else {
+                        return !file.path.startsWith(exclude)
+                    }
+                })
+            const maxSizeCondition = ((file.size || 0) <= (maxTokens - (maxTokensFile || 150)) * bytesPerToken)
+            return maxSizeCondition && ((!excludes) || excludesCondition)
+        })
+    }
     const generator = new DocumentationGenerator(files, options)
     await generator.start()
     const resFile = cliOptions?.outFile || config?.outFile || (isDir ? path.resolve(rootDirOrSelectedFile, "docs.ai.json") : path.resolve(__dirname, "docs.ai.json"))

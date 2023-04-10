@@ -8,7 +8,21 @@
                 <button @click="selectFolder" class="btn-select bg-gray-100 mt-6" ><IconFolder/></button>
                 <button v-if="dir" @click="openFile(dir)" class="p-1 bg-gray-100 mt-6 text-sm ml-2">Open in Explorer</button>
             </div>
-            <InputText class="mb-2 max-queries" v-model:value="maxQueries" label="Maximum number of requests simultaneously" @update:value="val => ls('maxQueries', val)"  />
+            <div>
+                <b>Config: </b>
+            </div>
+            <div class="config flex-center">
+                <span class="text-sm" :class="{'underline cursor-pointer': config}" @click="openConfig"> {{ configSource }}</span>
+                <button class="ml-1" v-if="config"  @click="() => (configFile = '', config = null)" >✕</button>
+                <button class="px-3 py-1 text-sm rounded bg-blue-200 ml-2" @click="loadConfig()">Load config</button>
+                <button v-if="configChanged" class="px-3 py-1 text-sm rounded bg-blue-200 ml-2" @click="saveConfig()">Save config *</button>
+            </div>
+            <Settings
+                class="mt-2 mb-2"
+                :defaultConfig="localStorageConfig"
+                :configSource="configSource"
+                :config="config"
+                @update:value="val => updateSettings(val)" />
             <div class="description text-sm">
                 <div>
                     Count of requests: {{ $refs.files?.selectedFiles?.length }}
@@ -38,7 +52,7 @@
 </template>
 
 <script lang="ts">
-        import {debounce, size} from 'lodash'
+    import { debounce, size } from 'lodash'
     import { defineComponent } from 'vue'
     import InputText from './components/misc/InputText.vue'
     import ls from 'local-storage'
@@ -48,9 +62,10 @@
     import path from 'path'
     import Result from '@/components/Result.vue'
     import { getFilesInDirectory } from '@/../helpers'
-    import { DocumentationGenerator } from '@/../engine'
+    import { DocumentationGenerator, DocumentationGeneratorOptions } from '@/../engine'
     import IconFolder from './components/misc/IconFolder.vue'
     import { remote, shell } from 'electron'
+    import Settings from '@/components/Settings.vue'
 
     const resFile = path.resolve(dirname(), "./docs.ai.json")
     const selectedFile = path.resolve(dirname(), "./data/selectedFiles.json")
@@ -61,6 +76,7 @@
     export default defineComponent({
         name: 'App',
         components: {
+            Settings,
             IconFolder,
             Result,
             Files,
@@ -68,6 +84,10 @@
         },
         data() {
             return {
+                configChanged: false,
+                configFile: "",
+                config: null,
+                localStorageConfig: (ls as any)("localStorageConfig") || {},
                 saved: false,
                 done: false,
                 total,
@@ -84,12 +104,62 @@
             }
         },
         computed: {
+            configSource(): string {
+                if (this.configFile) {
+                    return `file: ${this.configFile}`
+                }
+                return `localhost (${origin})`
+            },
+
             // cost(): number {
             //     const tokensFilesSend = total(this.$refs.files?.selectedFiles?.map((selectedFile) => selectedFile.size || 0)) / bytesPerToken
             // },
 
         },
         methods: {
+            openConfig() {
+                if (this.configFile) {
+                    shell.openPath(this.configFile)
+                }
+            },
+
+            saveConfig() {
+                if (!this.config) {
+                    return
+                }
+                writeFileJSON(this.configFile, this.config)
+                this.configChanged = false
+            },
+
+            loadConfig() {
+                const options = {
+                    defaultPath: path.resolve(this.dir),
+                    filters: [{ name: 'JSON', extensions: ['json'] }]
+                }
+                remote.dialog.showOpenDialog(options).then(result => {
+                    if (result.canceled) {
+                        return
+                    }
+                    this.configFile = result.filePaths[0]
+                    this.config = readFileJSON(this.configFile)
+                    this.configChanged = false
+
+                    console.log("loadConfig", { resFile })
+                }).catch(err => {
+                    console.error(err)
+                })
+            },
+
+            updateSettings(val: DocumentationGeneratorOptions) {
+                if (this.config) {
+                    this.config = { ...this.config, ...val }
+                    this.configChanged = true
+                } else {
+                    this.localStorageConfig = { ...this.localStorageConfig, ...val }
+                    ls('localStorageConfig', val)
+                }
+            },
+
             openLink(path: string) {
                 shell.openExternal(path.replaceAll('&amp;', '&'))
             },
@@ -113,7 +183,7 @@
 
             save() {
                 this.saved = false
-                writeFileJSON(path.resolve(this.dir, "./docs.ai.json"), this.$refs.files.selectedFiles.map((selectedFile) => ({path: selectedFile.path, description: selectedFile.description, size: selectedFile.size})))
+                writeFileJSON(path.resolve(this.dir, "./docs.ai.json"), this.$refs.files.selectedFiles.map((selectedFile) => ({ path: selectedFile.path, description: selectedFile.description, size: selectedFile.size })))
                 console.log("save", { resFile })
                 this.saved = true
             },
@@ -138,7 +208,7 @@
                 ls("dir", "")
                 ls("apiKey", "")
                 ls("excludes", "")
-                ls("maxQueries", "")
+                ls("settings", "")
             },
 
             reload() {
@@ -182,6 +252,11 @@
                 if (existFile(dir)) {
                     this.files = getFilesInDirectory(dir, dir)
                 }
+                if (existFile(dir + "/docs.ai.config.json")) {
+                    this.configFile = dir + "/docs.ai.config.json"
+                    this.config = readFileJSON(this.configFile)
+                    this.configChanged = false
+                }
             }, 200),
         },
 
@@ -217,5 +292,14 @@
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         color: #2c3e50;
+    }
+    .flex-center{
+        display: flex;
+        align-items: center;
+    }
+    .flex-center-between{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
     }
 </style>

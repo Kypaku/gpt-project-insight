@@ -9,7 +9,7 @@ export interface NestedFile extends IFile {
     children: NestedFile[] | null;
 }
 
-export function getFilesInDirectory(rootDir, directory, excludes: string[] = ['node_modules']): IFile[] {
+export function getFilesInDirectory(rootDir, directory, excludes: string[] = ['node_modules', ".git", "dist"]): IFile[] {
     let files = [] as IFile[]
 
     fs.readdirSync(directory).forEach(file => {

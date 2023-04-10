@@ -55,7 +55,16 @@
                     const excludesCondition = this.excludes
                         .split(",")
                         .map((el) => el.trim())
-                        .some((exclude) => exclude[0] === "*" ? !~file.path.lastIndexOf(exclude.slice(1)) : !~file.path.indexOf(exclude))
+                        .every((exclude) => {
+                            if (exclude.startsWith("*")) {
+                                if (exclude.endsWith("*")) {
+                                    return !file.path.includes(exclude.slice(1, -1))
+                                }
+                                return !file.path.endsWith(exclude.slice(1))
+                            } else {
+                                return !file.path.startsWith(exclude)
+                            }
+                        })
                     const maxSizeCondition = ((file.size || 0) <= (maxTokens - 150) * bytesPerToken)
                     return maxSizeCondition && ((!this.excludes) || excludesCondition)
                 })

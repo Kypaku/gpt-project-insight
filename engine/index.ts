@@ -44,7 +44,7 @@ export class DocumentationGenerator {
                 if (file.fullPath) {
                     const fileOpts = { maxTokens: this.opts.maxTokensFile, temperature: this.opts.temperature, model: this.opts.model }
                     file.promise = getFileDescription(file, readFile(file.fullPath) || '', fileOpts)
-                    this.opts?.cli && console.log("start: " + file.fullPath, {fileOpts})
+                    this.opts?.cli && console.log("start: " + file.fullPath)
                     res = await file.promise
                 } else {
                     const children = this.files.filter(res => ((res.path && res.path.startsWith(file.path)) || file.path === ".") && res.path !== file.path && !res.used)
@@ -57,7 +57,7 @@ export class DocumentationGenerator {
                     const childrenWithDescriptions = children.filter(res => (res.description || res.state === 'error') && !res.used)
                     const descriptions = childrenWithDescriptions.map((pathOne) => ({ fileName: pathOne.path, description: (pathOne.description || `Size: ${pathOne.size} bytes`) || '' }))
                     const dirOpts = { maxTokens: this.opts.maxTokensDir, temperature: this.opts.temperature, model: this.opts.model }
-                    this.opts?.cli && console.log("start folder: " + file.path, {dirOpts})
+                    this.opts?.cli && console.log("start folder: " + file.path)
                     file.promise = getFolderDescription(file, descriptions, dirOpts)
                     childrenWithDescriptions.forEach((pathOne) => {
                         pathOne.used = true

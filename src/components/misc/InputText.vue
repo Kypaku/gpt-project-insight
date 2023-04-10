@@ -6,7 +6,7 @@
         <div class="text-left">
             <input
                 type="text"
-                class="border-2 ym-disable-keys text-sm py-1 px-2"
+                class="border-2 ym-disable-keys text-sm py-1 px-2 rounded"
                 ref="input"
                 :id="id"
                 :value="value"
