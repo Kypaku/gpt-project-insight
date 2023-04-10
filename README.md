@@ -52,6 +52,7 @@ node .\out_engine\engine\cli.js --help
 ## Config and options
 ### Config:
 You can load config from CLI using --config option
+
 Config loads automatically from file "docs.ai.config.json" in the electron app
 ### Options:
 *  --maxTokens <maxTokens>          the maximum number of tokens that the model can accept
