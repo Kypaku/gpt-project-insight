@@ -1,8 +1,8 @@
 * [How it works]()
-* [Project setup]()
-* [Run Electron app]()
-* [Generate using CLI]()
-* [Config and Settings]()
+* [Project setup](#project-setup)
+* [Run Electron app](#run-electron-app)
+* [Generate using CLI](#generate-using-cli)
+* [Config and Settings](#config-and-options)
 
 # Recursive documentation generator
 
@@ -56,19 +56,19 @@ node .\out_engine\engine\cli.js --help
 You can load config from CLI using --config option
 Config loads automatically from file "docs.ai.config.json" in the electron app
 ### Options:
-  --maxTokens <maxTokens>          the maximum number of tokens that the model can accept
-  --bytesPerToken <bytesPerToken>  approximate number of bytes in 
+*  --maxTokens <maxTokens>          the maximum number of tokens that the model can accept
+*  --bytesPerToken <bytesPerToken>  approximate number of bytes in 
 one token
-  --maxQueries <maxQueries>        Maximum number of requests simultaneously
-  --outFile <outFile>              The file to write the result   
-  --config <config>                The file to read the config from
-  --maxTokensFile <maxTokensFile>  The max tokens values for files  --maxTokensDir <maxTokensDir>    The max tokens values for directories
-  --bytesPerToken <bytesPerToken>  approximate number of bytes in 
+*  --maxQueries <maxQueries>        Maximum number of requests simultaneously
+*  --outFile <outFile>              The file to write the result   
+*  --config <config>                The file to read the config from
+*  --maxTokensFile <maxTokensFile>  The max tokens values for files  --maxTokensDir <maxTokensDir>    The max tokens values for directories
+*  --bytesPerToken <bytesPerToken>  approximate number of bytes in 
 one token
-  --temperature <temperature>      The temperature of the model   
-  --excludes <excludes>            The pattern to exclude files. Example: dir1,dir2,file3,*.png
-  --model <model>                  The model to use
-  -h, --help                       display help for command
+*  --temperature <temperature>      The temperature of the model   
+*  --excludes <excludes>            The pattern to exclude files. Example: dir1,dir2,file3,*.png
+*  --model <model>                  The model to use
+*  -h, --help                       display help for command
   
   
 
