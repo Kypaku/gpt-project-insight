@@ -3,6 +3,7 @@
 import { app, protocol, BrowserWindow } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
+import * as path from 'path'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 // Scheme must be registered before the app is ready
@@ -12,9 +13,12 @@ protocol.registerSchemesAsPrivileged([
 
 async function createWindow () {
     // Create the browser window.
+    const iconPath = path.join(__dirname, '..', 'public', 'icon.png')
+    console.log("createWindow", { iconPath })
     const win = new BrowserWindow({
         width: 800,
         height: 800,
+        icon: iconPath,
         webPreferences: {
             enableRemoteModule: true,
             contextIsolation: false,

@@ -8,6 +8,7 @@
                 <div class="text-sm" :class="{'text-green-500': file.state === 'done', 'text-red-500': file.state === 'error'}">
                     {{ file.state || 'queue' }}
                 </div>
+                <button class="ml-4" v-if="file.state === 'queued' || !file.state"  @click="$emit('del')" >✕</button>
             </div>
         </template>
         <div>

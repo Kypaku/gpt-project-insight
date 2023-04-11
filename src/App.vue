@@ -14,14 +14,16 @@
             <div class="config flex-center">
                 <span class="text-sm" :class="{'underline cursor-pointer': config}" @click="openConfig"> {{ configSource }}</span>
                 <button class="ml-1" v-if="config"  @click="() => (configFile = '', config = null)" >✕</button>
-                <button class="px-3 py-1 text-sm rounded bg-blue-200 ml-2" @click="loadConfig()">Load config</button>
-                <button v-if="configChanged" class="px-3 py-1 text-sm rounded bg-blue-200 ml-2" @click="saveConfig()">Save config *</button>
+                <button class="px-3 py-1 text-sm rounded bg-indigo-300 ml-2" @click="loadConfig()">Load config</button>
+                <button v-if="configChanged || !config" class="px-3 py-1 text-sm rounded bg-indigo-300 ml-2" @click="saveConfig()">
+                    Save config <span v-if="configChanged">*</span>
+                </button>
             </div>
             <Settings
                 class="mt-2 mb-2"
                 :defaultConfig="localStorageConfig"
-                :configSource="configSource"
                 :config="config"
+                :configSource="configSource"
                 @update:value="val => updateSettings(val)" />
             <div class="description text-sm">
                 <div>
@@ -35,11 +37,17 @@
                 <button class="px-4 py-1 rounded mb-2" :class="isLoading? 'bg-red-500 text-white' : 'bg-green-300'"  @click="run">
                     <b>{{isLoading ? 'Stop' : 'Run'}}</b>
                 </button>
-                <button v-if="done" class="px-4 py-1 rounded mb-2 bg-blue-300 ml-2" @click="save()" >Save docs.ai.json</button>
-                <button v-if="done" class="px-4 py-1 rounded mb-2 bg-blue-300 ml-2" @click="saveAs()">Save As...</button>
+                <button v-if="done" class="px-4 py-1 rounded mb-2 bg-indigo-300 ml-2" @click="save()" >Save docs.ai.json</button>
+                <button v-if="done" class="px-4 py-1 rounded mb-2 bg-indigo-300 ml-2" @click="saveAs()">Save As...</button>
                 <span v-if="saved" class="text-green-400 ml-2" >Saved!</span>
             </div>
-            <Files :files="files" ref="files" class="mt-4" />
+            <Files
+                :files="files"
+                ref="files"
+                class="mt-4"
+                @updateExcludes="val => updateSettings({ excludes: val })"
+                :defaultConfig="localStorageConfig"
+                :config="config"/>
             <!-- <Result :res="res" /> -->
         </div>
         <div class="footer flex items-center mt-6 px-2 py-1">
@@ -106,7 +114,7 @@
         computed: {
             configSource(): string {
                 if (this.configFile) {
-                    return `file: ${this.configFile}`
+                    return `${this.configFile}`
                 }
                 return `localhost (${origin})`
             },
@@ -125,6 +133,8 @@
 
             saveConfig() {
                 if (!this.config) {
+                    const configFile = this.dir + "/docs.ai.config.json"
+                    writeFileJSON(configFile, this.localStorageConfig)
                     return
                 }
                 writeFileJSON(this.configFile, this.config)

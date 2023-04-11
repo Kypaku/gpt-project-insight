@@ -5,14 +5,14 @@
         </div>
         <div class="flex items-center">
             <InputText
-                class="text-sm"
-                v-model:value="excludes"
+                class="text-sm w-full"
+                :value="excludes"
                 label="Excludes"
                 placeholder="dir1,dir2,file3,*.png"
-                @update:value="val => ls('excludes', val)"/>
+                @update:value="val => $emit('updateExcludes', val)"/>
         </div>
         <div class="selected-files flex flex-col items-start my-4">
-            <File :file="item"  v-for="(item, i) in selectedFiles" :key="i"/>
+            <File :file="item"  v-for="(item, i) in selectedFiles" :key="i" @del="del(item)"/>
         </div>
         <!-- <FileTree :items="nestedFiles" /> -->
     </div>
@@ -29,11 +29,19 @@
     import ls from 'local-storage'
     import File from '@/components/File.vue'
     import { maxTokens, bytesPerToken } from '../App.vue'
+    import { DocumentationGeneratorOptions } from 'engine'
 
     export default defineComponent({
         props: {
             files: Array as PropType<IFile[]>,
-
+            config: {
+                type: Object as PropType<DocumentationGeneratorOptions>,
+                default: () => null
+            },
+            defaultConfig: {
+                type: Object as PropType<DocumentationGeneratorOptions>,
+                default: () => null
+            },
         },
         components: {
             File,
@@ -45,11 +53,13 @@
         data() {
             return {
                 ls,
-                excludes: ls("excludes") as unknown as string || '',
-
             }
         },
         computed: {
+            excludes(): string {
+                return (this.config as any)?.excludes || (this.defaultConfig as any)?.excludes || ''
+            },
+
             selectedFiles(): IFile[] {
                 const selected = this.files.filter((file) => {
                     const excludesCondition = this.excludes
@@ -81,6 +91,9 @@
 
         },
         methods: {
+            del(item: IFile) {
+                this.$emit('updateExcludes', this.excludes + ', ' + item.path)
+            },
 
         },
     })
