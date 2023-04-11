@@ -8,7 +8,7 @@ This project generates documentation recursively using the OpenAI API. To use th
 
 ## How it works
 
-<img src="https://i.yapx.ru/V4Ygo.png" width="500">
+<img src="https://downloader.disk.yandex.ru/preview/229881ab1c37ddf5445be8a5707a399927aaeea356d96dc6515bf71a4c591983/642f52e6/o9MKawjFgPPvRfzAVQpJfhQ6bN0oY-R_wTW09y-x8NXCiMrAQXNGbjBXg8GpY2ZiF6znJWGi8APcxVjlfgHG5g%3D%3D?uid=0&filename=2023-04-06_22-16-17.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2048x2048" width="500">
 
 
 ## Project setup
@@ -20,7 +20,7 @@ npm install
 ```
 npm run electron:serve
 ```
-<img src="https://downloader.disk.yandex.ru/preview/fda469575eb3353d46e81343e351ef1be7481d91fb33ffff945fefda5e8e933d/642f5412/8LnlQia5tTBvOgM3wL_HNhboq677O_K9fky8ZGymyrX9CUGHDnIIPqTiWBPBUaBzn97BU5VIHLjCZcGVeWs8pw%3D%3D?uid=0&filename=2023-04-06_22-21-20.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2048x2048" width="500">
+<img src="https://i.yapx.ru/V4Ygo.png" width="500">
 
 ## Generate using CLI
 
