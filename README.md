@@ -8,7 +8,7 @@ This project generates documentation recursively using the OpenAI API. To use th
 
 ## How it works
 
-<img src="https://downloader.disk.yandex.ru/preview/229881ab1c37ddf5445be8a5707a399927aaeea356d96dc6515bf71a4c591983/642f52e6/o9MKawjFgPPvRfzAVQpJfhQ6bN0oY-R_wTW09y-x8NXCiMrAQXNGbjBXg8GpY2ZiF6znJWGi8APcxVjlfgHG5g%3D%3D?uid=0&filename=2023-04-06_22-16-17.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2048x2048" width="500">
+<img src="https://i.yapx.ru/V4Ygo.png" width="500">
 
 
 ## Project setup
