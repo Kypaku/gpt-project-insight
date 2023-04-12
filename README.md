@@ -20,7 +20,8 @@ npm install
 ```
 npm run electron:serve
 ```
-<img src="https://downloader.disk.yandex.ru/preview/fda469575eb3353d46e81343e351ef1be7481d91fb33ffff945fefda5e8e933d/642f5412/8LnlQia5tTBvOgM3wL_HNhboq677O_K9fky8ZGymyrX9CUGHDnIIPqTiWBPBUaBzn97BU5VIHLjCZcGVeWs8pw%3D%3D?uid=0&filename=2023-04-06_22-21-20.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2048x2048" width="500">
+
+<img src="https://i.ibb.co/MZ2hgcw/localhost-8083.png" width="500">
 
 ## Generate using CLI
 
