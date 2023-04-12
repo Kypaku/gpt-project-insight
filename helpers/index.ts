@@ -62,10 +62,14 @@ export function generateNestedFiles(files: IFile[]): NestedFile[] {
 
 export function getParentFolders(fileList: string[]): string[] {
     const fileCounts: Record<string, number> = {}
+    const newFileList = [...fileList]
 
-    for (const filePath of fileList) {
+    for (const filePath of newFileList) {
         const dirPath = path.dirname(filePath)
         fileCounts[dirPath] = (fileCounts[dirPath] || 0) + 1
+        if (!newFileList.includes(dirPath)) {
+            newFileList.push(dirPath)
+        }
     }
 
     const parentFolders = Object.keys(fileCounts).filter((dirPath) => {
@@ -73,3 +77,32 @@ export function getParentFolders(fileList: string[]): string[] {
     })
     return [...parentFolders].reverse()
 }
+
+export function getUpdatedParentFolders(fileList: string[], prevList: string[]): string[] {
+    const fileCounts: Record<string, number> = {}
+    const prevFileCounts: Record<string, number> = {}
+
+    const newFileList = [...fileList]
+    const newPrevFileList = [...prevList]
+
+    for (const filePath of newFileList) {
+        const dirPath = path.dirname(filePath)
+        fileCounts[dirPath] = (fileCounts[dirPath] || 0) + 1
+        if (!newFileList.includes(dirPath)) {
+            newFileList.push(dirPath)
+        }
+    }
+    for (const filePath of newPrevFileList) {
+        const dirPath = path.dirname(filePath)
+        prevFileCounts[dirPath] = (prevFileCounts[dirPath] || 0) + 1
+        if (!newPrevFileList.includes(dirPath)) {
+            newPrevFileList.push(dirPath)
+        }
+    }
+
+    const parentFolders = Object.keys(fileCounts).filter((dirPath) => {
+        return fileCounts[dirPath] + prevFileCounts[dirPath] > 1
+    })
+    return [...parentFolders].reverse()
+}
+

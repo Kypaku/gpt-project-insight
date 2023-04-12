@@ -2,7 +2,7 @@ import { getFileDescription, getFolderDescription, gptAPI } from "./api"
 import * as path from 'path'
 import { isDirectory, readFile, readFileJSON, sleep, writeFileJSON } from "../helpers/node_gm"
 import { IFile } from "../types"
-import { getParentFolders } from "../helpers"
+import { getParentFolders, getUpdatedParentFolders } from "../helpers"
 
 export interface DocumentationGeneratorOptions {
     maxQueries?: number
@@ -14,17 +14,19 @@ export interface DocumentationGeneratorOptions {
     bytesPerToken?: number
     temperature?: number
     model?: string
-} 
+}
 
 export class DocumentationGenerator {
     private files: IFile[];
+    private prevResult: IFile[];
     private opts: DocumentationGeneratorOptions;
     private isStopped: boolean;
 
-    constructor(files: IFile[], opts?: DocumentationGeneratorOptions) {
+    constructor(files: IFile[], opts?: DocumentationGeneratorOptions, prevResult?: IFile[]) {
         this.files = files
         this.opts = opts || {}
         this.isStopped = false
+        this.prevResult = prevResult || []
     }
 
     public async start(): Promise<IFile[] | undefined> {
@@ -33,8 +35,15 @@ export class DocumentationGenerator {
             gptAPI.setApiKey(this.opts.apiKey)
         }
         if (this.opts.cli) {
-            const parentFolders = getParentFolders(this.files.map(file => file.path)).filter((pathOne) => this.files.find((file) => file.path === pathOne) === undefined)
-            this.files.push(...parentFolders.map(folder => ({ path: folder })))
+            if (this.prevResult.length) {
+                const parentFolders = getUpdatedParentFolders(this.files.map((file) => file.path), this.prevResult.map((file) => file.path))
+                const parentItems = parentFolders
+                    .map(folder => ({ path: folder }))
+                this.files.push(...parentItems)
+            } else {
+                const parentFolders = getParentFolders(this.files.map(file => file.path)).filter((pathOne) => this.files.find((file) => file.path === pathOne) === undefined)
+                this.files.push(...parentFolders.map(folder => ({ path: folder })))
+            }
         }
 
         const queryFn = async (file: IFile) => {
@@ -48,13 +57,14 @@ export class DocumentationGenerator {
                     res = await file.promise
                 } else {
                     const children = this.files.filter(res => ((res.path && res.path.startsWith(file.path)) || file.path === ".") && res.path !== file.path && !res.used)
+                    const prevChildren = this.prevResult.filter(res => ((res.path && res.path.startsWith(file.path)) || file.path === ".") && res.path !== file.path && !res.used)
                     const childrenPromises = children.map((child) => child.promise)
                     while (children.some((el) => el.state !== 'done' && el.state !== 'error')) {
                         file.promise = Promise.allSettled(childrenPromises) as any
                         await file.promise
                         await sleep(0)
                     }
-                    const childrenWithDescriptions = children.filter(res => (res.description || res.state === 'error') && !res.used)
+                    const childrenWithDescriptions = [...prevChildren, ...children].filter(res => (res.description || res.state === 'error') && !res.used)
                     const descriptions = childrenWithDescriptions.map((pathOne) => ({ fileName: pathOne.path, description: (pathOne.description || `Size: ${pathOne.size} bytes`) || '' }))
                     const dirOpts = { maxTokens: this.opts.maxTokensDir, temperature: this.opts.temperature, model: this.opts.model }
                     this.opts?.cli && console.log("start folder: " + file.path)
