@@ -15,7 +15,6 @@ export interface DocumentationGeneratorOptions {
     temperature?: number
     model?: string
 }
-
 export class DocumentationGenerator {
     private files: IFile[];
     private prevResult: IFile[];

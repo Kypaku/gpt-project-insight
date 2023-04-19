@@ -28,9 +28,7 @@
     import Accordeon from './misc/Accordeon.vue'
     import ls from 'local-storage'
     import File from '@/components/File.vue'
-    import { maxTokens, bytesPerToken } from '../App.vue'
     import { DocumentationGeneratorOptions } from 'engine'
-    import { getFileDate, isDirectory } from '@/../helpers/node_gm'
 
     export default defineComponent({
         props: {
