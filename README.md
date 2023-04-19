@@ -7,8 +7,7 @@
 This project generates documentation recursively using the OpenAI API. To use this application, you need to have an API Key for the [Open AI API](https://platform.openai.com/)
 
 ## How it works
-
-<img src="https://downloader.disk.yandex.ru/preview/229881ab1c37ddf5445be8a5707a399927aaeea356d96dc6515bf71a4c591983/642f52e6/o9MKawjFgPPvRfzAVQpJfhQ6bN0oY-R_wTW09y-x8NXCiMrAQXNGbjBXg8GpY2ZiF6znJWGi8APcxVjlfgHG5g%3D%3D?uid=0&filename=2023-04-06_22-16-17.png&disposition=inline&hash=&limit=0&content_type=image%2Fpng&owner_uid=0&tknv=v2&size=2048x2048" width="500">
+<img src="https://i.ibb.co/Vxt6v4g/68747470733a2f2f646f776e6c6f616465722e6469736b2e79616e6465782e72752f707265766965772f3232393838316162.webp" width="500">
 
 
 ## Project setup
