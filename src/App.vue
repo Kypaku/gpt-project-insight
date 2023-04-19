@@ -2,60 +2,67 @@
     <div class="app">
         <div class="header"></div>
         <div class="main flex flex-col items-start px-4 mt-4">
-            <InputText class="mb-2" v-model:value="apiKey" label="API Key" @update:value="val => ls('apiKey', val)"  />
+            <InputApiKey />
             <div class="flex items-center mb-4">
                 <InputText v-model:value="dir" placeholder="C:/Projects/sample-app/src" label="Project directory" @update:value="updateFiles"  />
                 <button @click="selectFolder" class="btn-select bg-gray-100 mt-6" ><IconFolder/></button>
                 <button v-if="dir" @click="openFile(dir)" class="p-1 bg-gray-100 mt-6 text-sm ml-2">Open in Explorer</button>
             </div>
-            <div>
-                <b>Config: </b>
-            </div>
-            <div class="config flex-center">
-                <span class="text-sm" :class="{'underline cursor-pointer': config}" @click="openConfig"> {{ configSource }}</span>
-                <button class="ml-1" v-if="config"  @click="() => (configFile = '', config = null)" >✕</button>
-                <button class="px-3 py-1 text-sm rounded bg-indigo-300 ml-2" @click="loadConfig()">Load config</button>
-                <button v-if="configChanged || !config" class="px-3 py-1 text-sm rounded bg-indigo-300 ml-2" @click="saveConfig()">
-                    Save config <span v-if="configChanged">*</span>
-                </button>
-            </div>
+            <Config
+                :config="config"
+                :configFile="configFile"
+                @delConfig="() => (configFile = '', config = null)"
+                @loadConfig="loadConfig"
+                @saveConfig="saveConfig"
+                :configChanged="configChanged" />
             <Settings
                 class="mt-2 mb-2"
                 :defaultConfig="localStorageConfig"
                 :config="config"
-                :configSource="configSource"
                 @update:value="val => updateSettings(val)" />
             <div class="description text-sm">
                 <div>
-                    Count of requests: {{ $refs.files?.selectedFiles?.length }}
+                    Count of requests: {{selectedFiles.length }}
                 </div>
-                <!-- <div v-if="$refs.files?.selectedFiles">
+                <!-- <div v-if="">
                     Approximate tokens count: {{ cost }}$
                 </div> -->
             </div>
             <div class="flex items-center">
-                <button class="px-4 py-1 rounded mb-2" :class="isLoading? 'bg-red-500 text-white' : 'bg-green-300'"  @click="run">
-                    <b>{{isLoading ? 'Stop' : 'Run'}}</b>
+                <button
+                    title="Generate documentation for all the following files"
+                    class="px-4 py-1 rounded mb-2"
+                    :disabled="isUpdateLoading"
+                    :class="isLoading ? 'bg-red-500 text-white' : 'bg-green-300'"
+                    @click="run(false)">
+                    <b>{{isLoading ? 'Stop' : 'Generate'}}</b>
                 </button>
-                <button v-if="done" class="px-4 py-1 rounded mb-2 bg-indigo-300 ml-2" @click="save()" >Save docs.ai.json</button>
+                <button
+                    title="Generate documentation for only files that have been changed since the last generation"
+                    v-if="mergedFiles.find((selectedFile) => selectedFile.state !== 'done') && mergedFiles.filter((selectedFile) => selectedFile.state !== 'done').length !== mergedFiles.length"
+                    class="px-4 py-1 ml-2 rounded mb-2"
+                    :disabled="isLoading"
+                    :class="isUpdateLoading? 'bg-red-500 text-white' : 'bg-yellow-300'"
+                    @click="() => run(true)">
+                    <b>{{isUpdateLoading ? 'Stop' : 'Update'}}</b>
+                </button>
+                <button v-if="done" class="px-4 py-1 rounded mb-2 bg-indigo-300 ml-2" @click="save(dir + '/docs.ai.json')" >Save docs.ai.json</button>
                 <button v-if="done" class="px-4 py-1 rounded mb-2 bg-indigo-300 ml-2" @click="saveAs()">Save As...</button>
                 <span v-if="saved" class="text-green-400 ml-2" >Saved!</span>
             </div>
             <Files
-                :files="files"
+                :key="'files_' + filesI"
+                :dir="dir"
+                :files="mergedFiles"
                 ref="files"
                 class="mt-4"
-                @updateExcludes="val => updateSettings({ excludes: val })"
+                @updateExcludes="val => (updateSettings({ excludes: val }))"
                 :defaultConfig="localStorageConfig"
+                :prevResult="prevResult"
+                :isUpdateLoading="isUpdateLoading"
                 :config="config"/>
-            <!-- <Result :res="res" /> -->
         </div>
-        <div class="footer flex items-center mt-6 px-2 py-1">
-            <button class="p-1 bg-gray-200 mr-2 rounded" @click="reload">Reload</button>
-            <button class="p-1 bg-gray-200 mr-2 rounded" @click="openLink('https://platform.openai.com/account/usage')">OpenAI Page</button>
-            <button class="p-1 bg-gray-200 mr-2 rounded" @click="openLink('https://github.com/Kypaku/gpt-files-documentation')">Repo</button>
-            <button class="p-1 bg-gray-200 mr-2 rounded" @click="clearCache">Clear Cache</button>
-        </div>
+        <TheFooter/>
     </div>
 </template>
 
@@ -66,17 +73,19 @@
     import ls from 'local-storage'
     import Files from '@/components/Files.vue'
     import { IFile } from '@/../types'
-    import { existFile, getFileDate, readFileJSON, run, dirname, total, openFile, writeFileJSON } from '@/../helpers/node_gm'
+    import { existFile, getFileDate, readFileJSON, run, dirname, total, openFile, writeFileJSON, isDirectory } from '@/../helpers/node_gm'
     import path from 'path'
     import Result from '@/components/Result.vue'
-    import { getFilesInDirectory } from '@/../helpers'
+    import { exclude, getFilesInDirectory, getParentFolders, getUpdatedParentFolders } from '@/../helpers'
     import { DocumentationGenerator, DocumentationGeneratorOptions } from '@/../engine'
     import IconFolder from './components/misc/IconFolder.vue'
     import { remote, shell } from 'electron'
     import Settings from '@/components/Settings.vue'
+    import TheFooter from '@/components/TheFooter.vue'
+    import Config from '@/components/Config.vue'
+    import InputApiKey from '@/components/misc/InputApiKey.vue'
 
     const resFile = path.resolve(dirname(), "./docs.ai.json")
-    const selectedFile = path.resolve(dirname(), "./data/selectedFiles.json")
 
     export const maxTokens = 4097
     export const bytesPerToken = 4
@@ -84,6 +93,9 @@
     export default defineComponent({
         name: 'App',
         components: {
+            InputApiKey,
+            Config,
+            TheFooter,
             Settings,
             IconFolder,
             Result,
@@ -92,6 +104,9 @@
         },
         data() {
             return {
+                filesI: 0,
+                isUpdateLoading: false,
+                prevResult: [] as IFile[],
                 configChanged: false,
                 configFile: "",
                 config: null,
@@ -107,30 +122,85 @@
                 isLoading: false,
                 files: [] as IFile[],
                 dir: ls("dir") as unknown as string || '',
-                apiKey: ls("apiKey") as unknown as string || '',
                 ls,
             }
         },
         computed: {
-            configSource(): string {
-                if (this.configFile) {
-                    return `${this.configFile}`
+            currentConfig() {
+                return {
+                    ...this.localStorageConfig,
+                    ...this.config,
                 }
-                return `localhost (${origin})`
+            },
+            excludes(): string {
+                return this.currentConfig?.excludes || ''
             },
 
             // cost(): number {
             //     const tokensFilesSend = total(this.$refs.files?.selectedFiles?.map((selectedFile) => selectedFile.size || 0)) / bytesPerToken
             // },
-
+            excludedFiles(): IFile[] {
+                return exclude(this.files, this.excludes, { maxTokens, bytesPerToken, maxTokensFile: this.currentConfig.maxTokensFile })
+            },
+            prevResultDate(): number {
+                return +(getFileDate(this.dir + "/docs.ai.json") || 0)
+            },
+            needToUpdateFiles(): IFile[] {
+                return this.excludedFiles.filter(file => {
+                    return this.isFileNeedUpdate(file)
+                })
+            },
+            parentFolders(): string[] {
+                const selectedPaths = this.excludedFiles.map(file => file.path)
+                const parentFolders = getParentFolders(selectedPaths)
+                    .filter((pathOne) => !selectedPaths.includes(pathOne))
+                return parentFolders
+            },
+            updatedParentFolders(): string[] {
+                const undoneFiles = this.needToUpdateFiles.map((file) => file.path)
+                const prevParentFolders = getUpdatedParentFolders(undoneFiles, this.prevResult.map((file) => file.path))
+                return prevParentFolders
+            },
+            selectedFiles(): IFile[] {
+                const selected: IFile[] = [...this.excludedFiles]
+                if (this.prevResult.length) {
+                    selected.push(...this.parentFolders.map(folder => ({ path: folder, fullPath: path.resolve(this.dir, folder) })))
+                    console.log("selectedFiles", this.updatedParentFolders)
+                } else {
+                    selected.push(...this.parentFolders.map(folder => ({ path: folder, fullPath: path.resolve(this.dir, folder) })))
+                }
+                return selected
+            },
+            mergedFiles(): IFile[] {
+                if (this.prevResult.length) {
+                    if (true) { //! this.done! this.isUpdateLoading && !this.isLoading &&
+                        return this.selectedFiles.map((file) => {
+                            const prevFile = this.prevResult.find((prevFile) => prevFile.path === file.path)
+                            let needToUpdate = this.isFileNeedUpdate(file)
+                            if (isDirectory(file.fullPath)) {
+                                needToUpdate = this.updatedParentFolders.includes(file.path)
+                            }
+                            return {
+                                ...file,
+                                state: needToUpdate ? undefined : "done",
+                                description: (prevFile !== undefined && !needToUpdate) ? prevFile?.description : file.description,
+                            }
+                        })
+                    } else {
+                        return this.selectedFiles
+                    }
+                } else {
+                    return this.selectedFiles
+                }
+            }
         },
         methods: {
-            openConfig() {
-                if (this.configFile) {
-                    shell.openPath(this.configFile)
-                }
+            isFileNeedUpdate(file: IFile): boolean {
+                const prevFile = this.prevResult.find((prevFile) => prevFile.path === file.path)
+                const dateCond = (file.fullPath && !isDirectory(file.fullPath) && +(getFileDate(file?.fullPath) || 0) > this.prevResultDate)
+                const needToUpdate = !prevFile || !prevFile.description || dateCond
+                return needToUpdate
             },
-
             saveConfig() {
                 if (!this.config) {
                     const configFile = this.dir + "/docs.ai.config.json"
@@ -138,6 +208,12 @@
                     return
                 }
                 writeFileJSON(this.configFile, this.config)
+                this.configChanged = false
+            },
+
+            loadConfigRaw(_path: string) {
+                this.configFile = _path
+                this.config = readFileJSON(this.configFile)
                 this.configChanged = false
             },
 
@@ -150,10 +226,7 @@
                     if (result.canceled) {
                         return
                     }
-                    this.configFile = result.filePaths[0]
-                    this.config = readFileJSON(this.configFile)
-                    this.configChanged = false
-
+                    this.loadConfigRaw(result.filePaths[0])
                     console.log("loadConfig", { resFile })
                 }).catch(err => {
                     console.error(err)
@@ -170,10 +243,6 @@
                 }
             },
 
-            openLink(path: string) {
-                shell.openExternal(path.replaceAll('&amp;', '&'))
-            },
-
             saveAs() {
                 const options = {
                     defaultPath: path.resolve(this.dir, "./docs.ai.json"),
@@ -183,17 +252,17 @@
                     if (result.canceled) {
                         return
                     }
-                    writeFileJSON(result.filePath, this.$refs.files.selectedFiles)
-                    console.log("saveAs", { resFile })
+                    this.save(result.filePath)
                     this.saved = true
                 }).catch(err => {
                     console.error(err)
                 })
             },
 
-            save() {
+            save(file: string) {
                 this.saved = false
-                writeFileJSON(path.resolve(this.dir, "./docs.ai.json"), this.$refs.files.selectedFiles.map((selectedFile) => ({ path: selectedFile.path, description: selectedFile.description, size: selectedFile.size })))
+                const res = this.mergedFiles.map((selectedFile) => ({ path: selectedFile.path, description: selectedFile.description, size: selectedFile.size }))
+                writeFileJSON(file, res)
                 console.log("save", { resFile })
                 this.saved = true
             },
@@ -206,49 +275,59 @@
                         this.dir = result.filePaths[0]
                         this.updateFilesSync(this.dir)
                         this.saved = false
-
-                        // do something with the selected folder
                     }
                 }).catch(err => {
                     console.log(err)
                 })
             },
-
-            clearCache() {
-                ls("dir", "")
-                ls("apiKey", "")
-                ls("excludes", "")
-                ls("settings", "")
+            setLoading(value: boolean, isUpdate?: boolean) {
+                if (isUpdate) {
+                    this.isUpdateLoading = value
+                } else {
+                    this.isLoading = value
+                }
             },
-
-            reload() {
-                location.reload()
-            },
-
-            async run() {
+            async run(isUpdate?: boolean) {
+                let intervalId: any = null
                 try {
-                    if (this.isLoading) {
+                    if (isUpdate ? this.isUpdateLoading : this.isLoading) {
                         this.generator.stop()
-                        this.isLoading = false
+                        this.setLoading(false, isUpdate)
                         this.done = true
                     } else {
                         this.saved = false
-                        this.isLoading = true
-                        this.updateFilesSync(this.dir)
+                        this.setLoading(true, isUpdate)
+                        // this.updateFilesSync(this.dir)
                         const options = {
-                            apiKey: this.apiKey,
+                            apiKey: (ls as any)("apiKey"),
                             maxQueries: this.maxQueries,
                         }
-                        this.filesArr = [...this.$refs.files.selectedFiles]
-                        this.generator = new DocumentationGenerator(this.filesArr, options)
+                        // this.filesArr = [...this.mergedFiles]
+                        const filesArr = [...this.mergedFiles]
+                        filesArr.forEach((filesArrOne) => {
+                            if (isUpdate) {
+                                if (filesArrOne.state !== 'done') {
+                                    delete filesArrOne.description
+                                }
+                            } else {
+                                delete filesArrOne.description
+                                filesArrOne.state = undefined
+                            }
+                        })
+                        this.generator = new DocumentationGenerator(filesArr, options)
+                        intervalId = setInterval(() => {
+                            this.filesI++
+                        }, 250)
                         this.res = await this.generator.start()
-                        this.isLoading = false
+                        this.setLoading(false, isUpdate)
                         this.done = true
                     }
                 } catch (e) {
                     console.error("catch", { e })
                 } finally {
-                    this.isLoading = false
+                    this.setLoading(false, isUpdate)
+                    this.filesI++
+                    clearInterval(intervalId)
                 }
             },
             updateFilesSync(dir) {
@@ -256,17 +335,15 @@
                 if (existFile(dir)) {
                     this.files = getFilesInDirectory(dir, dir)
                 }
+                if (existFile(dir + "/docs.ai.config.json")) {
+                    this.loadConfigRaw(dir + "/docs.ai.config.json")
+                }
+                if (existFile(dir + "/docs.ai.json")) {
+                    this.prevResult = readFileJSON(dir + "/docs.ai.json").filter((prevResultFileOne) => prevResultFileOne.description)
+                }
             },
             updateFiles: debounce(function(dir) {
-                ls("dir", dir)
-                if (existFile(dir)) {
-                    this.files = getFilesInDirectory(dir, dir)
-                }
-                if (existFile(dir + "/docs.ai.config.json")) {
-                    this.configFile = dir + "/docs.ai.config.json"
-                    this.config = readFileJSON(this.configFile)
-                    this.configChanged = false
-                }
+                this.updateFilesSync(dir)
             }, 200),
         },
 
@@ -275,12 +352,6 @@
         },
 
         watch: {
-            filesArr: {
-                handler (newVal) {
-                    this.files = newVal
-                },
-                deep: true,
-            },
 
         },
     })
@@ -299,8 +370,6 @@
     }
     #app {
         font-family: Avenir, Helvetica, Arial, sans-serif;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
         color: #2c3e50;
     }
     .flex-center{

@@ -2,6 +2,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { getFileSize } from './node_gm'
 import { IFile } from '../types'
+import { DocumentationGeneratorOptions } from '../engine';
 
 export interface NestedFile extends IFile {
     name: string;
@@ -23,7 +24,7 @@ export function getFilesInDirectory(rootDir, directory, excludes: string[] = ['n
                 path: path.relative(rootDir, absolutePath),
                 fullPath: path.resolve(absolutePath),
                 size: getFileSize(absolutePath) || 0,
-                state: 'queued',
+                state: undefined,
                 description: ''
              })
         }
@@ -106,3 +107,22 @@ export function getUpdatedParentFolders(fileList: string[], prevList: string[]):
     return [...parentFolders].reverse()
 }
 
+export function exclude (files: IFile[], excludes: string, opts: Partial<DocumentationGeneratorOptions>): IFile[] {
+    return files.filter((file) => {
+        const excludesCondition = excludes
+            .split(",")
+            .map((el) => el.trim())
+            .every((exclude) => {
+                if (exclude.startsWith("*")) {
+                    if (exclude.endsWith("*")) {
+                        return !file.path.includes(exclude.slice(1, -1))
+                    }
+                    return !file.path.endsWith(exclude.slice(1))
+                } else {
+                    return !file.path.startsWith(exclude)
+                }
+            })
+        const maxSizeCondition = ((file.size || 0) <= ((opts?.maxTokens || 4097) - (opts?.maxTokensFile || 150)) * (opts?.bytesPerToken || 4))
+        return maxSizeCondition && ((!excludes) || excludesCondition)
+    })
+}

@@ -4,7 +4,7 @@
             <b  >Files:</b>
         </div>
         <div class="flex items-center">
-            <InputText
+            <InputTextarea
                 class="text-sm w-full"
                 :value="excludes"
                 label="Excludes"
@@ -12,7 +12,7 @@
                 @update:value="val => $emit('updateExcludes', val)"/>
         </div>
         <div class="selected-files flex flex-col items-start my-4">
-            <File :file="item"  v-for="(item, i) in selectedFiles" :key="i" @del="del(item)"/>
+            <File :file="item"  v-for="(item, i) in files" :key="`${item.path}_${item.state}`" @del="del(item)"/>
         </div>
         <!-- <FileTree :items="nestedFiles" /> -->
     </div>
@@ -22,17 +22,30 @@
     import { defineComponent, PropType } from 'vue'
 
     import { IFile } from '@/../types'
-    import { generateNestedFiles, NestedFile, getParentFolders } from '@/../helpers'
+    import { generateNestedFiles, NestedFile, getParentFolders, getUpdatedParentFolders } from '@/../helpers'
     import FileTree from './misc/FileTree.vue'
-    import InputText from './misc/InputText.vue'
+    import InputTextarea from './misc/InputTextarea.vue'
     import Accordeon from './misc/Accordeon.vue'
     import ls from 'local-storage'
     import File from '@/components/File.vue'
     import { maxTokens, bytesPerToken } from '../App.vue'
     import { DocumentationGeneratorOptions } from 'engine'
+    import { getFileDate, isDirectory } from '@/../helpers/node_gm'
 
     export default defineComponent({
         props: {
+            isUpdateLoading: {
+                type: Boolean,
+                default: () => false
+            },
+            dir: {
+                type: String,
+                default: () => ''
+            },
+            prevResult: {
+                type: Array as PropType<IFile[]>,
+                default: () => []
+            },
             files: Array as PropType<IFile[]>,
             config: {
                 type: Object as PropType<DocumentationGeneratorOptions>,
@@ -45,7 +58,7 @@
         },
         components: {
             File,
-            InputText,
+            InputTextarea,
             FileTree,
             Accordeon,
         },
@@ -60,29 +73,6 @@
                 return (this.config as any)?.excludes || (this.defaultConfig as any)?.excludes || ''
             },
 
-            selectedFiles(): IFile[] {
-                const selected = this.files.filter((file) => {
-                    const excludesCondition = this.excludes
-                        .split(",")
-                        .map((el) => el.trim())
-                        .every((exclude) => {
-                            if (exclude.startsWith("*")) {
-                                if (exclude.endsWith("*")) {
-                                    return !file.path.includes(exclude.slice(1, -1))
-                                }
-                                return !file.path.endsWith(exclude.slice(1))
-                            } else {
-                                return !file.path.startsWith(exclude)
-                            }
-                        })
-                    const maxSizeCondition = ((file.size || 0) <= (maxTokens - 150) * bytesPerToken)
-                    return maxSizeCondition && ((!this.excludes) || excludesCondition)
-                })
-                const parentFolders = getParentFolders(selected.map(file => file.path)).filter((pathOne) => selected.find((file) => file.path === pathOne) === undefined)
-                selected.push(...parentFolders.map(folder => ({ path: folder })))
-                return selected
-            },
-
             nestedFiles(): NestedFile[] {
                 const res = generateNestedFiles(this.files)
                 console.log("nestedFiles", { res })
@@ -92,7 +82,7 @@
         },
         methods: {
             del(item: IFile) {
-                this.$emit('updateExcludes', this.excludes + ', ' + item.path)
+                this.$emit('updateExcludes', (this.excludes ? this.excludes + ', ' : '') + item.path)
             },
 
         },

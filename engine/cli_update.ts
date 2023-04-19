@@ -1,8 +1,9 @@
 import { DocumentationGenerator, DocumentationGeneratorOptions } from "."
-import { getFilesInDirectory } from "../helpers"
-import { existFile, isDirectory, readFileJSON, writeFileJSON } from "../helpers/node_gm"
+import { exclude, getFilesInDirectory } from "../helpers"
+import { existFile, getFileDate, isDirectory, readFileJSON, writeFileJSON } from "../helpers/node_gm"
 import * as path from 'path'
 import { program } from 'commander'
+import { IFile } from "../types"
 
 program
     .option('--maxTokens <maxTokens>', 'the maximum number of tokens that the model can accept')
@@ -46,37 +47,22 @@ async function update(rootDirOrSelectedFile: string) {
         model,
         maxTokensFile,
         maxTokensDir
-    }
+    } 
 
-    let files = isDir ? getFilesInDirectory(rootDirOrSelectedFile, rootDirOrSelectedFile) : readFileJSON(rootDirOrSelectedFile)
+    let files: IFile[] = isDir ? getFilesInDirectory(rootDirOrSelectedFile, rootDirOrSelectedFile) : readFileJSON(rootDirOrSelectedFile)
     if (excludes) {
-        files = files.filter((file) => {
-            const excludesCondition = excludes
-                .split(",")
-                .map((el) => el.trim())
-                .every((exclude) => {
-                    if (exclude.startsWith("*")) {
-                        if (exclude.endsWith("*")) {
-                            return !file.path.includes(exclude.slice(1, -1))
-                        }
-                        return !file.path.endsWith(exclude.slice(1))
-                    } else {
-                        return !file.path.startsWith(exclude)
-                    }
-                })
-            const maxSizeCondition = ((file.size || 0) <= (maxTokens - (maxTokensFile || 150)) * bytesPerToken)
-            return maxSizeCondition && ((!excludes) || excludesCondition)
-        })
+        files = exclude(files, excludes, {...options})
     }
 
     // Only files that have not descriptions
     const prevResultFile = cliOptions?.outFile || config?.outFile || (isDir ? path.resolve(rootDirOrSelectedFile, "docs.ai.json") : path.resolve(__dirname, "docs.ai.json"))
+    const prevResultDate = +(getFileDate(prevResultFile) || 0)
     const prevResult = existFile(prevResultFile) ? readFileJSON(prevResultFile).filter((prevResultFileOne) => prevResultFileOne.description) : []
     files = files.filter((file) => {
         const prevFile = prevResult.find((prevFile) => prevFile.path === file.path)
-        return !prevFile || !prevFile.description
+        const dateCond = (file.fullPath && !isDirectory(file.fullPath) && +(getFileDate(file?.fullPath) || 0) > (prevResultDate || 0))
+        return !prevFile || !prevFile.description || dateCond
     })
-
     const generator = new DocumentationGenerator(files, options, prevResult)
     await generator.start()
     const resFile = cliOptions?.outFile || config?.outFile || (isDir ? path.resolve(rootDirOrSelectedFile, "docs.ai.json") : path.resolve(__dirname, "docs.ai.json"))

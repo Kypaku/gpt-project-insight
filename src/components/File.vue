@@ -12,7 +12,7 @@
             </div>
         </template>
         <div>
-            <div class="underline cursor-pointer text-sm" @click="showPrompt = !showPrompt">{{showPrompt ? 'Hide' : 'Show'  }} the prompt </div>
+            <div class="underline cursor-pointer text-sm" v-if="file.prompt" @click="showPrompt = !showPrompt">{{showPrompt ? 'Hide' : 'Show'  }} the prompt </div>
             <div class="text-sm" v-if="showPrompt">
                 <b>Prompt</b>
                 <div class="prompt" >

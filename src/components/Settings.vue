@@ -43,10 +43,6 @@
 
     export default defineComponent({
         props: {
-            configSource: {
-                type: String,
-                default: () => ''
-            },
             config: {
                 type: Object as PropType<DocumentationGeneratorOptions>,
                 default: () => null

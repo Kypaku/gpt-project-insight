@@ -1,5 +1,5 @@
 import { DocumentationGenerator, DocumentationGeneratorOptions } from "."
-import { getFilesInDirectory } from "../helpers"
+import { exclude, getFilesInDirectory } from "../helpers"
 import { existFile, isDirectory, readFileJSON, writeFileJSON } from "../helpers/node_gm"
 import * as path from 'path'
 import { program } from 'commander'
@@ -52,23 +52,7 @@ async function main(rootDirOrSelectedFile: string) {
 
     let files = isDir ? getFilesInDirectory(rootDirOrSelectedFile, rootDirOrSelectedFile) : readFileJSON(rootDirOrSelectedFile)
     if (excludes) {
-        files = files.filter((file) => {
-            const excludesCondition = excludes
-                .split(",")
-                .map((el) => el.trim())
-                .every((exclude) => {
-                    if (exclude.startsWith("*")) {
-                        if (exclude.endsWith("*")) {
-                            return !file.path.includes(exclude.slice(1, -1))
-                        }
-                        return !file.path.endsWith(exclude.slice(1))
-                    } else {
-                        return !file.path.startsWith(exclude)
-                    }
-                })
-            const maxSizeCondition = ((file.size || 0) <= (maxTokens - (maxTokensFile || 150)) * bytesPerToken)
-            return maxSizeCondition && ((!excludes) || excludesCondition)
-        })
+        files = exclude(files, excludes, {...options})
     }
     const generator = new DocumentationGenerator(files, options)
     await generator.start()

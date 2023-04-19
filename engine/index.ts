@@ -48,9 +48,12 @@ export class DocumentationGenerator {
 
         const queryFn = async (file: IFile) => {
             try {
+                if (file.state === 'done' || file.state === 'error' || file.state === 'stopped') {
+                    return
+                }
                 file.state = 'pending'
                 let res = {} as any
-                if (file.fullPath) {
+                if (file.fullPath && !isDirectory(file.fullPath)) {
                     const fileOpts = { maxTokens: this.opts.maxTokensFile, temperature: this.opts.temperature, model: this.opts.model }
                     file.promise = getFileDescription(file, readFile(file.fullPath) || '', fileOpts)
                     this.opts?.cli && console.log("start: " + file.fullPath)

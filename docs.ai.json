@@ -6,23 +6,23 @@
     },
     {
         "path": "engine\\cli.ts",
-        "description": "This file contains the command-line interface (CLI) for the DocumentationGenerator class. It imports necessary modules and defines CLI options using the Commander library. The main function reads CLI options and a configuration file, filters files based on exclude patterns, creates a DocumentationGenerator instance, generates documentation, and writes the result to a file. The file can be either specified in CLI options or read from the configuration file.",
-        "size": 4365
+        "description": "This file contains the command-line interface (CLI) for the DocumentationGenerator class, which generates documentation for files and directories using an AI model. It includes options for setting maximum tokens, bytes per token, maximum queries, and more. The CLI reads from a configuration file or command-line arguments and outputs the result to a specified file.",
+        "size": 3614
     },
     {
         "path": "engine\\cli_update.ts",
         "description": "This file, engine\\cli_update.ts, contains a TypeScript script that updates documentation for selected files or directories using the Docs AI API. It includes options for setting maximum tokens, bytes per token, maximum queries, and more. The script reads from a configuration file if available and writes the result to a specified output file.",
-        "size": 5283
+        "size": 4799
     },
     {
         "path": "engine\\index.ts",
-        "description": "The file engine\\index.ts contains the implementation of a DocumentationGenerator class, which generates descriptions for files and folders using an API. It also includes helper functions for file and folder manipulation, as well as options for customizing the generation process. The class uses a semaphore to limit the number of simultaneous queries and can be stopped at any time.",
-        "size": 6101
+        "description": "The file engine\\index.ts contains the implementation of a DocumentationGenerator class, which generates descriptions for files and folders using an API. It also includes helper functions for reading and writing files, as well as functions for managing concurrency when querying the API. The class takes in a list of files and options, and returns a list of updated files with descriptions.",
+        "size": 6279
     },
     {
         "path": "helpers\\index.ts",
-        "description": "The file helpers\\index.ts contains functions for working with files and directories, including getting a list of files in a directory, generating a nested file structure, and getting parent folders of a list of files. It also includes an interface for representing nested files.",
-        "size": 3579
+        "description": "The file helpers\\index.ts contains various helper functions for working with files and directories, including getting files in a directory, generating nested file structures, getting parent folders, and excluding files based on certain conditions. It also includes interfaces and imports necessary for these functions to work properly.",
+        "size": 4542
     },
     {
         "path": "package.json",
@@ -31,37 +31,52 @@
     },
     {
         "path": "README.md",
-        "description": "This README.md file provides a short description of a recursive documentation generator project. It includes instructions on how to set up the project, run the Electron app, and generate documentation using CLI. The project uses the OpenAI API and requires an API key to function. The file also provides information on configuration options and settings, including maximum tokens, bytes per token, maximum queries, output file, excludes pattern, model selection, and temperature.",
-        "size": 2718
-    },
-    {
-        "path": "src\\App.vue",
-        "description": "The App.vue file contains the main component of the application, which includes various sub-components such as InputText, Files, Settings, and Result. It also includes methods for handling user interactions and updating the state of the application. The component allows users to select a project directory, choose files to include in documentation, and generate documentation using OpenAI's GPT-3 API. Additionally, users can save and load configuration files and clear cache.",
-        "size": 12198
+        "description": "This file provides a brief overview of the Recursive Documentation Generator project. It includes instructions for project setup, running the Electron app, generating documentation using CLI, and configuring options. The project uses the OpenAI API to generate documentation recursively and requires an API key to use. The file also includes a diagram explaining how the application works.",
+        "size": 2423
     },
     {
         "path": "src\\background.ts",
-        "description": "This file, located at src\\background.ts, contains the main code for creating and managing the Electron browser window. It registers the necessary schemes, creates the window with specified dimensions and preferences, loads the appropriate URL based on whether it is in development mode or not, and handles events such as window closing and activation. Additionally, it installs Vue Devtools if in development mode and exits cleanly upon request from the parent process.",
+        "description": "This file, located at src\\background.ts, contains the main code for creating and managing the Electron browser window. It registers the necessary schemes, creates the window with specified dimensions and preferences, loads the appropriate URL depending on whether it is in development mode or not, and handles events such as window closing and activation. Additionally, it installs Vue Devtools if in development mode and exits cleanly upon request from the parent process.",
         "size": 2687
     },
     {
+        "path": "src\\components\\Config.vue",
+        "description": "The Config.vue file is a Vue.js component that displays a configuration panel with options to load, save, and delete a configuration file. It also allows users to view the current configuration file and open it in the default system editor. The component receives props for the current configuration object, the path to the configuration file, and a boolean indicating if changes have been made to the configuration.",
+        "size": 1829
+    },
+    {
         "path": "src\\components\\File.vue",
-        "description": "This is a Vue.js component file located at src\\components\\File.vue. It contains an Accordeon component that displays information about a file, including its path, state, prompt, and response. The component can be disabled if there is no description and the state is not an error. The user can click on a button to delete the file. The file's properties are passed as props to the component.",
-        "size": 2092
+        "description": "The File.vue component is a Vue.js file that displays information about a file, including its path, state, prompt, and response. It uses the Accordeon component to display the information in an expandable format. The component also includes a button to delete the file and styling for the different states of the file.",
+        "size": 2111
     },
     {
         "path": "src\\components\\Files.vue",
-        "description": "The Files.vue file is a Vue component that displays a list of selected files and allows the user to exclude certain files or directories. It also includes a FileTree component and other miscellaneous components for input and display. The component takes in an array of IFile objects and options for generating documentation.",
-        "size": 3962
+        "description": "The Files.vue file is a Vue component that displays a list of files and allows the user to exclude certain files or directories. It also includes a FileTree component and uses other custom components such as InputTextarea, Accordeon, and File. The component receives props such as the list of files, configuration options, and previous results. It also has computed properties and methods for handling file exclusions.",
+        "size": 3161
+    },
+    {
+        "path": "src\\components\\misc\\InputApiKey.vue",
+        "description": "This file contains a Vue component called InputApiKey, which is responsible for rendering an input field for the user to enter their API key. The component uses local storage to save and retrieve the API key value. It also imports and uses another component called InputText.vue.",
+        "size": 763
+    },
+    {
+        "path": "src\\components\\misc\\InputTextarea.vue",
+        "description": "This file contains the code for a Vue.js component called InputTextarea, which is a customizable text input field with an optional label and placeholder. It also includes suggestions functionality, allowing users to select from a list of suggested values based on their input. The component is written in TypeScript and includes scoped CSS styling.",
+        "size": 2613
     },
     {
         "path": "src\\components\\Settings.vue",
-        "description": "The file src\\components\\Settings.vue contains a Vue component that displays a settings accordion with input fields for configuring various options such as maximum number of requests, model, max tokens file and directory, and temperature. It also includes sub-components for InputText and Accordeon.",
-        "size": 3051
+        "description": "The file src\\components\\Settings.vue contains a Vue component that displays a settings accordion with input fields for configuring various options such as maximum number of requests, model, max tokens file and directory, and temperature. It also imports and uses two other components - InputText and Accordeon.",
+        "size": 2940
+    },
+    {
+        "path": "src\\components\\TheFooter.vue",
+        "description": "TheFooter.vue is a Vue.js component that displays a footer with buttons for reloading the page, opening external links, and clearing cache. It also includes methods for handling these actions.",
+        "size": 1393
     },
     {
         "path": "src\\main.ts",
-        "description": "The main.ts file is the entry point for a Vue.js application and contains code to create the app, mount it to the DOM, and handle keyboard events for toggling developer tools and reloading the page. It also imports the App component and a CSS file for styling, as well as the Electron shell module for accessing native desktop functionality.",
+        "description": "The main.ts file imports necessary dependencies and mounts the Vue application to the DOM. It also includes event listeners for keyboard shortcuts to toggle developer tools and reload the page.",
         "size": 382
     },
     {
@@ -70,19 +85,23 @@
         "size": 320
     },
     {
+        "path": "src\\components\\misc",
+        "description": "The \"misc\" directory in the \"components\" folder contains two Vue.js components - InputApiKey.vue and InputTextarea.vue. InputApiKey.vue renders an input field for users to enter their API key, while InputTextarea.vue is a customizable text input field with suggestions functionality. Both components are written in TypeScript and include scoped CSS styling."
+    },
+    {
         "path": "src\\components",
-        "description": "The src\\components directory contains Vue.js components for displaying and managing files and settings. The File.vue component displays information about a file, including its path, state, prompt, and response. The Files.vue component displays a list of selected files and allows the user to exclude certain files or directories. The Settings.vue component provides input fields for configuring various options such as maximum number of requests, model, max tokens file and directory, and temperature."
+        "description": "The \"src\\components\" directory contains various Vue.js components that are used to display and configure different aspects of the application. These components include a configuration panel, file information display, file list with exclusion options, settings accordion, footer with buttons for various actions, and two input field components for API key and customizable text input. Each component has its own unique functionality and receives props to customize its behavior."
     },
     {
         "path": "src",
-        "description": "The \"src\" directory contains the main components and code for a Vue.js application that allows users to generate documentation using OpenAI's GPT-3 API. It includes the App.vue file, which is the main component of the application, as well as background.ts and main.ts files for managing the Electron browser window and handling keyboard events. The src\\components directory contains Vue.js components for displaying and managing files and settings, including File.vue, Files.vue, and Settings.vue."
+        "description": "The \"src\" directory contains the main code for an Electron browser window application. It includes files for managing the window, mounting the Vue application, and various Vue.js components for configuring and displaying different aspects of the application."
     },
     {
         "path": ".",
-        "description": "This directory contains files and directories related to a recursive documentation generator project. It includes functions for working with files and directories, a package.json file with project information and dependencies, a README.md file with instructions on how to set up and use the project, an interface for defining properties of a file, and the main components and code for a Vue.js application that allows users to generate documentation using OpenAI's GPT-3 API. Additionally, there are files for generating descriptions of files and folders using APIs, including a command-line interface and helper functions for file and folder manipulation."
+        "description": "The directory contains the main code for a Recursive Documentation Generator project. It includes a command-line interface (CLI) and functions for generating descriptions of files and folders using AI models. The \"src\" directory contains the main code for an Electron browser window application, while the \"engine\" directory contains helper functions for managing concurrency and reading/writing files. The package.json file lists dependencies and includes scripts for serving, building, and linting the project. The README.md file provides instructions for project setup and usage."
     },
     {
         "path": "engine",
-        "description": "The \"engine\" directory contains files for generating descriptions of files and folders using APIs. It includes a command-line interface for the DocumentationGenerator class, a script for updating documentation using the Docs AI API, and an implementation of the DocumentationGenerator class with helper functions for file and folder manipulation. The functions use prompts and options to generate descriptions using GPT-3 or Docs AI models, and can be customized to limit simultaneous queries."
+        "description": "The \"engine\" directory contains files that enable the generation of documentation for files and folders using AI models. It includes a command-line interface (CLI) for the DocumentationGenerator class, functions for retrieving descriptions using the GPT-3 API, and a TypeScript script that updates documentation using the Docs AI API. The directory also contains helper functions for managing concurrency and reading/writing files."
     }
 ]

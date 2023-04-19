@@ -27,6 +27,7 @@ module.exports = {
         semi: 'warn',
         // 'no-explicit-any': 'on',
         "@typescript-eslint/ban-types": "warn",
+        "no-constant-condition": "warn",
         "@typescript-eslint/no-explicit-any": "warn",
         '@typescript-eslint/ban-ts-comment': 'warn',
         '@typescript-eslint/no-empty-function': 'warn',
