@@ -68,7 +68,7 @@
         },
         computed: {
             excludes(): string {
-                return (this.config as any)?.excludes || (this.defaultConfig as any)?.excludes || ''
+                return (this.config as any)?.excludes || ''
             },
 
             nestedFiles(): NestedFile[] {

@@ -14,6 +14,7 @@ export interface DocumentationGeneratorOptions {
     bytesPerToken?: number
     temperature?: number
     model?: string
+    timeout?: number
 }
 export class DocumentationGenerator {
     private files: IFile[];
@@ -53,7 +54,7 @@ export class DocumentationGenerator {
                 file.state = 'pending'
                 let res = {} as any
                 if (file.fullPath && !isDirectory(file.fullPath)) {
-                    const fileOpts = { maxTokens: this.opts.maxTokensFile, temperature: this.opts.temperature, model: this.opts.model }
+                    const fileOpts = { maxTokens: this.opts.maxTokensFile, temperature: this.opts.temperature, model: this.opts.model, ...this.opts }
                     file.promise = getFileDescription(file, readFile(file.fullPath) || '', fileOpts)
                     this.opts?.cli && console.log("start: " + file.fullPath)
                     res = await file.promise
@@ -68,7 +69,7 @@ export class DocumentationGenerator {
                     }
                     const childrenWithDescriptions = [...prevChildren, ...children].filter(res => (res.description || res.state === 'error') && !res.used)
                     const descriptions = childrenWithDescriptions.map((pathOne) => ({ fileName: pathOne.path, description: (pathOne.description || `Size: ${pathOne.size} bytes`) || '' }))
-                    const dirOpts = { maxTokens: this.opts.maxTokensDir, temperature: this.opts.temperature, model: this.opts.model }
+                    const dirOpts = { maxTokens: this.opts.maxTokensDir, temperature: this.opts.temperature, model: this.opts.model, ...this.opts }
                     this.opts?.cli && console.log("start folder: " + file.path)
                     file.promise = getFolderDescription(file, descriptions, dirOpts)
                     childrenWithDescriptions.forEach((pathOne) => {

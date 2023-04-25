@@ -31,7 +31,7 @@ export const getFileDescription = async (file: IFile, content: string, opts?: an
         gptOpts.model = opts?.model
     }
     const gptRequest = gptAPI.getFirst(prompt, gptOpts)
-    const description = (await Promise.race([gptRequest, timeoutPromise(timeout)])) as any || ""
+    const description = (await Promise.race([gptRequest, timeoutPromise(opts?.timeout || timeout)])) as any || ""
     return { description, prompt }
 }
 
@@ -47,12 +47,12 @@ export const getFolderDescription = async (file: IFile, descriptions: IFileDescr
         gptOpts.model = opts?.model
     }
     const gptRequest = gptAPI.getFirst(prompt, gptOpts)
-    const description = await Promise.race([gptRequest, timeoutPromise(timeout)]) as any || ""
+    const description = await Promise.race([gptRequest, timeoutPromise(opts?.timeout || timeout)]) as any || ""
     return { description, prompt }
 }
 
 export const getAnswer = async (prompt: string, opts?: any): Promise<string> => {
     const gptRequest = gptAPI.getFirst(prompt, opts)
-    const answer = await Promise.race([gptRequest, timeoutPromise(timeout)]) as any || ""
+    const answer = await Promise.race([gptRequest, timeoutPromise(opts?.timeout || timeout)]) as any || ""
     return answer
 }

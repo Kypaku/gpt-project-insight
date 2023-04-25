@@ -126,3 +126,7 @@ export function exclude (files: IFile[], excludes: string, opts: Partial<Documen
         return maxSizeCondition && ((!excludes) || excludesCondition)
     })
 }
+
+export function lengthToTokensCount(l: number): number {
+    return Math.ceil(l / 4)
+}

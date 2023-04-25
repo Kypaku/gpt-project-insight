@@ -37,7 +37,6 @@
             ref="files"
             class="mt-4"
             @updateExcludes="val => $emit('updateSettings', { excludes: val })"
-            :defaultConfig="localStorageConfig"
             :prevResult="prevResult"
             :isUpdateLoading="isUpdateLoading"
             :config="config"/>
@@ -53,8 +52,8 @@
     import { getFileDate, isDirectory, writeFileJSON } from '@/../helpers/node_gm'
     import path from 'path'
     import { remote } from 'electron'
-    import {resFile} from '../App.vue' 
-    import ls from 'local-storage' 
+    import { resFile } from '../App.vue'
+    import ls from 'local-storage'
 
     export const maxTokens = 4097
     export const bytesPerToken = 4
@@ -64,10 +63,6 @@
             prevResult: {
                 type: Array as PropType<IFile[]>,
                 default: () => []
-            },
-            localStorageConfig: {
-                type: Object as PropType<DocumentationGeneratorOptions>,
-                default: () => null
             },
             config: {
                 type: Object as PropType<DocumentationGeneratorOptions>,
@@ -98,19 +93,13 @@
         },
         computed: {
             excludes(): string {
-                return this.currentConfig?.excludes || ''
-            },
-            currentConfig() {
-                return {
-                    ...this.localStorageConfig,
-                    ...this.config,
-                }
+                return this.config?.excludes || ''
             },
             // cost(): number {
             //     const tokensFilesSend = total(this.$refs.files?.selectedFiles?.map((selectedFile) => selectedFile.size || 0)) / bytesPerToken
             // },
             excludedFiles(): IFile[] {
-                return exclude(this.files, this.excludes, { maxTokens, bytesPerToken, maxTokensFile: this.currentConfig.maxTokensFile })
+                return exclude(this.files, this.excludes, { maxTokens, bytesPerToken, maxTokensFile: this.config.maxTokensFile })
             },
             prevResultDate(): number {
                 return +(getFileDate(this.dir + "/docs.ai.json") || 0)
@@ -215,6 +204,8 @@
                         const options = {
                             apiKey: (ls as any)("apiKey"),
                             maxQueries: this.maxQueries,
+                            ...this.config,
+                            timeout: this.config.documentationTimeout,
                         }
                         // this.filesArr = [...this.mergedFiles]
                         const filesArr = [...this.mergedFiles]

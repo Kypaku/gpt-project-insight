@@ -782,6 +782,12 @@ export function py3Exec(path: string, args: any) {
     return exec(`python ${path} ${_args}`)
 }
 
+export function isPythonInstalled(): boolean {
+    const proc = spawnSync('python')
+    // console.log(proc);
+    return !!proc?.output?.toString()
+}
+
 export function callPySync(path: string, args?: any) {
     const proc = spawnSync('python', args ? [path, ...args] : [path])
     // console.log(proc);

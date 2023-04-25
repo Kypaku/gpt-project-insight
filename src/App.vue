@@ -4,7 +4,11 @@
         <div class="main flex flex-col items-start px-4 mt-4">
             <InputApiKey />
             <div class="flex items-center mb-4">
-                <InputText v-model:value="dir" placeholder="C:/Projects/sample-app/src" label="Project directory" @update:value="updateFiles"  />
+                <InputText
+                    v-model:value="dir"
+                    placeholder="C:/Projects/sample-app/src"
+                    label="Project directory"
+                    @update:value="updateFiles"  />
                 <button @click="selectFolder" class="btn-select bg-gray-100 mt-6" ><IconFolder/></button>
                 <button v-if="dir" @click="openFile(dir)" class="p-1 bg-gray-100 mt-6 text-sm ml-2">Open in Explorer</button>
             </div>
@@ -21,8 +25,8 @@
                 :config="config"
                 @update:value="val => updateSettings(val)" />
             <div class="tabs w-full text-lg flex text-center mt-4 mb-4">
-                <div class="tab w-1/2 cursor-pointer py-2 text-lg" :class="{active: tab === 'docs' || !tab}" @click="tab = ''">Documentation</div>
-                <div class="tab w-1/2 cursor-pointer py-2 text-lg" :class="{active: tab === 'insight'}" @click="tab = 'insight'">Insight</div>
+                <div class="tab w-1/2 cursor-pointer py-2 text-lg" :class="{active: tab === 'docs' || !tab}" @click="() => (tab = '', ls('tab', ''))">Documentation</div>
+                <div class="tab w-1/2 cursor-pointer py-2 text-lg" :class="{active: tab === 'insight'}" @click="() => (tab = 'insight', ls('tab', 'insight'))">Insight</div>
             </div>
             <TabDocs
                 ref="tabDocs"
@@ -30,9 +34,14 @@
                 :files="files"
                 :dir="dir"
                 @updateSettings="val => updateSettings(val)"
-                :config="config"
-                :local-storage-config="localStorageConfig"
+                :config="currentConfig"
                 :prevResult="prevResult"
+            />
+            <TabInsight
+                v-if="tab === 'insight'"
+                :documentation="prevResult"
+                :config="currentConfig"
+                :dir="dir"
             />
             <TheFooter/>
         </div>
@@ -46,7 +55,7 @@
     import ls from 'local-storage'
     import Files from '@/components/Files.vue'
     import { IFile } from '@/../types'
-    import { existFile, getFileDate, readFileJSON, run, dirname, total, openFile, writeFileJSON, isDirectory } from '@/../helpers/node_gm'
+    import { existFile, getFileDate, readFileJSON, run, dirname, total, openFile, writeFileJSON, isPythonInstalled, callPySync } from '@/../helpers/node_gm'
     import path from 'path'
     import Result from '@/components/Result.vue'
     import { exclude, getFilesInDirectory, getParentFolders, getUpdatedParentFolders } from '@/../helpers'
@@ -58,12 +67,14 @@
     import Config from '@/components/Config.vue'
     import InputApiKey from '@/components/misc/InputApiKey.vue'
     import TabDocs from '@/components/TabDocs.vue'
+    import TabInsight from '@/components/TabInsight.vue'
 
     export const resFile = path.resolve(dirname(), "./docs.ai.json")
 
     export default defineComponent({
         name: 'App',
         components: {
+            TabInsight,
             TabDocs,
             InputApiKey,
             Config,
@@ -76,7 +87,7 @@
         },
         data() {
             return {
-                tab: "",
+                tab: (ls as any)("tab") || "",
                 prevResult: [] as IFile[],
                 configChanged: false,
                 configFile: "",
@@ -94,6 +105,12 @@
             }
         },
         computed: {
+            currentConfig() {
+                return {
+                    ...this.localStorageConfig,
+                    ...this.config,
+                }
+            },
         },
         methods: {
             saveConfig() {
@@ -171,7 +188,8 @@
         },
 
         created () {
-            this.updateFiles(this.dir)
+            this.updateFilesSync(this.dir)
+            console.log("created", path.resolve(), { __dirname: __dirname.replace(path.resolve('node_modules', 'electron', 'dist', 'resources', 'electron.asar'), '') })
         },
 
         watch: {

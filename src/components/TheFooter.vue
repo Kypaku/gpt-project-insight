@@ -33,6 +33,7 @@
                 ls("apiKey", "")
                 ls("excludes", "")
                 ls("settings", "")
+                ls("tab", "")
             },
             openLink(path: string) {
                 shell.openExternal(path.replaceAll('&amp;', '&'))

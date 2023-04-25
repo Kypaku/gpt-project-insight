@@ -60,7 +60,7 @@ module.exports = {
         'no-unused-expressions': 'off',
         "vue/max-attributes-per-line": ["warn", {
             "singleline": {
-              "max": 4
+              "max": 3
             },      
             "multiline": {
               "max": 1
