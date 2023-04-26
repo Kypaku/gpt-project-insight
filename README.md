@@ -1,4 +1,4 @@
-# GPT Projects Insight
+# GPT Project Insight
 * [Project setup](#project-setup)
 * [Run Electron app](#run-electron-app)
 * [Generate using CLI](#generate-using-cli)
