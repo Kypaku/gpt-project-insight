@@ -5,7 +5,7 @@
 * [Config and Settings](#config-and-options)
 * [Examples](#examples)
 
-This project generates documentation recursively using the OpenAI API. To use this application, you need to have an API Key for the [Open AI API](https://platform.openai.com/)
+An engine for generating recursive documentation and using it to work on a project with ChatGPT. To use this application, you need to have an API Key for the [Open AI API](https://platform.openai.com/)
 
 ## How it works
 
