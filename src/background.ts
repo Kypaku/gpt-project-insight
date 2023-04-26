@@ -16,7 +16,7 @@ async function createWindow () {
     const iconPath = path.join(__dirname, '..', 'public', 'icon.png')
     console.log("createWindow", { iconPath })
     const win = new BrowserWindow({
-        width: 800,
+        width: 1000,
         height: 800,
         icon: iconPath,
         webPreferences: {

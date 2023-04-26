@@ -71,11 +71,10 @@
                 return (this.config as any)?.excludes || ''
             },
 
-            nestedFiles(): NestedFile[] {
-                const res = generateNestedFiles(this.files)
-                console.log("nestedFiles", { res })
-                return res
-            },
+            // nestedFiles(): NestedFile[] {
+            //     const res = generateNestedFiles(this.files)
+            //     return res
+            // },
 
         },
         methods: {

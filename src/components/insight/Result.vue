@@ -1,12 +1,17 @@
 <template>
     <div>
         <b >Result: </b>
-        <div class="result text-sm mt-2 bg-yellow-50 p-1 rounded" >
-            {{ content }}
+        <div class="result text-sm mt-2 bg-yellow-50 p-2 rounded" >
+            <template v-for="(segment, i) in segments">
+                <div :key="i" class="code-block mb-1" v-if="segment.isCode">
+                    <pre class="overflow-auto max-h-80"><code>{{ segment.text.trim()}}</code></pre>
+                </div>
+                <span :key="i + 'text'" v-else>{{ segment.text }}</span>
+            </template>
         </div>
         <div class="actions flex-center flex-wrap mt-2">
             <button
-                class="action text-sm bg-blue-300 px-2 py-1 rounded-lg mb-2 mr-2"
+                class="action text-sm px-2 py-1 rounded-lg mb-2 mr-2"
                 v-for="(action, i) in actions"
                 :key="i"
                 @click="action.handler">
@@ -90,6 +95,10 @@
                     }
                 })
             },
+            segments(): {isCode?: boolean, text: string}[] {
+                const divider = "`" + "`" + "`"
+                return this.content?.split(divider)?.map((dividerOne, i) => ({ isCode: !!(i % 2), text: dividerOne.trim() })) || []
+            },
         },
         methods: {
 
@@ -100,6 +109,42 @@
 
 <style lang="scss" scoped>
     .result{
-        white-space: pre-line;
+        white-space: pre-wrap;
+    }
+    .action{
+        background: rgb(219, 235, 240);
+    }
+    .button-copy{
+
+    border-bottom-left-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+    }
+
+    .result-body{
+    white-space: pre-line;
+    }
+
+    .code-block {
+    display: flex;
+    flex-direction: column;
+        .language {
+        font-size: 0.8rem;
+        color: #6b7280;
+        }
+        pre {
+        background-color: #202124;
+        color: beige;
+        border-radius: 0.5rem;
+        border-radius: 0.5rem;
+        padding: 0 1rem;
+        overflow-x: auto;
+        }
+        code {
+        font-family: "Fira Code", monospace;
+        font-size: 0.9rem;
+        line-height: 1.2rem;
+        white-space: pre-wrap;
+        word-break: break-word;
+        }
     }
 </style>

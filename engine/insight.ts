@@ -32,14 +32,17 @@ export class Insight {
         const thePrompt = `I give a question: "${prompt}"
 And the list of files:
 ${opts?.filesStr || (opts?.fileNames || []).join('\n')}
-You need to decide you have enough information to answer the question or not.
-If you have enough information, you can answer the question.
-If you don't have enough information, you need to ask me about descriptions of which exactly files do you need.
-Use the format :file1, file2, ...
+
+You need to ask me about descriptions or content of which exactly files you need to answer the question.
+Use the format: file1, file2, ...
 `
+// If you don't know which exactly files you need, you have to suggest.
+// If you don't have enough information, 
+// You need to decide whether you have enough information to answer the question or not.
+// If you have enough information, you can answer the question.
         // call the first prompt
         console.log("insight.askFiles", {thePromptLength: lengthToTokensCount(thePrompt.length)})
-        const res = await getAnswer(thePrompt, {timeout: 120000, max_tokens: Math.floor(4097 - lengthToTokensCount(thePrompt.length) - (opts?.maxTokensShift || 100)), ...opts})
+        const res = await getAnswer(thePrompt, {timeout: 120000, max_tokens: Math.floor(4097 - lengthToTokensCount(thePrompt.length) - (opts?.maxTokensShift || 300)), ...opts})
         return res || ''
     }
 
@@ -55,7 +58,7 @@ ${filesStr ? 'Use the list of files:\n' + filesStr : ''}
 ${contentStr ? 'Use the content:\n' + contentStr : ''}
 `
         console.log("insight.ask", {thePromptLength: lengthToTokensCount(thePrompt.length)})
-        const res = await getAnswer(thePrompt, {timeout: 120000, max_tokens: Math.floor(4097 - lengthToTokensCount(thePrompt.length) - (opts?.maxTokensShift || 100)), ...opts})
+        const res = await getAnswer(thePrompt, {timeout: 120000, max_tokens: Math.floor(4097 - lengthToTokensCount(thePrompt.length) - (opts?.maxTokensShift || 300)), ...opts})
         return res || ''
     }
 

@@ -9,7 +9,7 @@
             </div>
         </div>
         <b>Prompt</b>
-        <InputTextarea v-model:value="prompt" class="mt-2 w-full" />
+        <InputTextarea v-model:value="prompt" class="w-full" :rows="3"/>
         <button @click="setToDefault" class="underline text-sm" >Set to default</button>
         <ToggleSwitch class="mt-2" v-model:value="includeFiles" :label="`Include files (+${lengthToTokensCount(filesStr.length)} tokens)`" />
         <ToggleSwitch
@@ -34,9 +34,13 @@
                 Tokens: ~{{ promptSize }}
             </div>
             <div>
-                Rest: ~{{ maxTokens - promptSize }}
+                Remaining: ~{{ maxTokens - promptSize }}
             </div>
         </div>
+        <Warning
+            class="mt-2"
+            :value="'To include descriptions in the prompt, you need to generate documentation.'"
+            v-if="!descriptionSize" />
         <div class="buttons mt-2">
             <button
                 class="px-2 py-1 rounded mb-2 mr-2"
@@ -61,13 +65,6 @@
             v-if="notEnoughTokens" />
         <!-- enable \'accurate token counting\' or -->
 
-        <Result
-            :content="result"
-            v-if="result"
-            class="mt-2"
-            :files="files"
-            :dir="dir"
-        />
         <ResultFiles
             class="result mt-2"
             :content="resultFiles"
@@ -78,6 +75,13 @@
             :contentStr="contentStr"
             @updateFilesStr="({field, file}) => updateFilesStr(field, true, file)"
             @addFileContent="file => addFileToContentStr(file)"
+        />
+        <Result
+            :content="result"
+            v-if="result"
+            class="mt-2"
+            :files="files"
+            :dir="dir"
         />
     </div>
 </template>
@@ -197,7 +201,7 @@
                 this.contentStr += readFile(file)
             },
             getTokensShift(): number {
-                return +(ls as any)('maxTokensShift') || 100
+                return +(ls as any)('maxTokensShift') || 300
             },
             updateFilesStr(field: string, value: boolean, file?: string) {
                 if (field === 'size') {
@@ -247,6 +251,9 @@
                             this.notEnoughTokens = true
                         }
                     }
+                    if (e.message === 'Timeout') {
+                        this.error = 'Timeout. Try to increase timeout in settings'
+                    }
                 } finally {
                     this.isFilesLoading = false
                 }
@@ -281,6 +288,9 @@
                         if (e.response?.data?.error?.code === 'context_length_exceeded') {
                             this.notEnoughTokens = true
                         }
+                    }
+                    if (e.message === 'Timeout') {
+                        this.error = 'Timeout. Try to increase timeout in settings'
                     }
                 } finally {
                     this.isLoading = false

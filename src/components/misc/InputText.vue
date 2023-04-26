@@ -7,6 +7,7 @@
             <input
                 type="text"
                 class="border-2 ym-disable-keys text-sm py-1 px-2 rounded"
+                :class="{error}"
                 ref="input"
                 :id="id"
                 :value="value"
@@ -41,6 +42,10 @@
 
     export default defineComponent({
         props: {
+            error: {
+                type: Boolean,
+                default: () => false
+            },
             placeholder: String,
             label: String,
             value: String,
@@ -77,6 +82,10 @@
     </script>
 
 <style lang="scss" scoped>
+    .error{
+        @apply border-red-400;
+    }
+
     .first{
         font-weight: 700;
     }

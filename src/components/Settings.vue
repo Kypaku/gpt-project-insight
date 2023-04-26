@@ -89,7 +89,7 @@
         },
         data() {
             return {
-                maxTokensShift: +(ls as any)('maxTokensShift') || 100,
+                maxTokensShift: +(ls as any)('maxTokensShift') || 300,
                 couldNotRunScript: '',
                 isPythonInstalled: false,
                 enableAccurateTokenCounting: (ls as any)('enableAccurateTokenCounting') || false,

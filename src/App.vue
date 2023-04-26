@@ -7,6 +7,7 @@
                 <InputText
                     v-model:value="dir"
                     placeholder="C:/Projects/sample-app/src"
+                    :error="!dir || !existFile(dir)"
                     label="Project directory"
                     @update:value="updateFiles"  />
                 <button @click="selectFolder" class="btn-select bg-gray-100 mt-6" ><IconFolder/></button>
@@ -30,7 +31,7 @@
             </div>
             <TabDocs
                 ref="tabDocs"
-                v-if="!tab || tab === 'docs' "
+                v-show="!tab || tab === 'docs' "
                 :files="files"
                 :dir="dir"
                 @updateSettings="val => updateSettings(val)"
@@ -39,9 +40,10 @@
             />
             <TabInsight
                 v-if="tab === 'insight'"
-                :documentation="prevResult"
+                :documentation="$refs?.tabDocs?.done ? $refs?.tabDocs?.mergedFiles : (prevResult.length ? prevResult : files)"
                 :config="currentConfig"
                 :dir="dir"
+                :key="dir"
             />
             <TheFooter/>
         </div>
@@ -87,6 +89,7 @@
         },
         data() {
             return {
+                existFile,
                 tab: (ls as any)("tab") || "",
                 prevResult: [] as IFile[],
                 configChanged: false,
@@ -160,6 +163,7 @@
                     properties: ['openDirectory'],
                 }).then(result => {
                     if (!result.canceled && result.filePaths.length > 0) {
+                        console.log("selectFolder")
                         this.dir = result.filePaths[0]
                         this.updateFilesSync(this.dir)
                         if (this.$refs.tabDocs) {
@@ -184,12 +188,11 @@
             },
             updateFiles: debounce(function(dir) {
                 this.updateFilesSync(dir)
-            }, 200),
+            }, 300),
         },
 
         created () {
-            this.updateFilesSync(this.dir)
-            console.log("created", path.resolve(), { __dirname: __dirname.replace(path.resolve('node_modules', 'electron', 'dist', 'resources', 'electron.asar'), '') })
+            this.dir && this.updateFilesSync(this.dir)
         },
 
         watch: {
@@ -200,6 +203,7 @@
 
 <style lang="scss" scoped>
     .tab{
+        background-color: rgb(241, 246, 248);
         &.active, &:hover {
             border-bottom: 2px solid #204eb2;
             background-color: rgb(219, 235, 240);
@@ -218,6 +222,7 @@
     #app {
         font-family: Avenir, Helvetica, Arial, sans-serif;
         color: #2c3e50;
+        background: white;
     }
     .flex-center{
         display: flex;

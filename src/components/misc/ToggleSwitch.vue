@@ -1,7 +1,7 @@
 <template>
     <div class="flex items-center space-x-2">
         <label :for="id" class="text-sm">{{ label }}</label>
-        <div class="relative inline-block w-10 align-middle select-none" :class="{disabled}">
+        <div class="relative inline-block w-9 align-middle select-none" :class="{disabled}">
             <input
                 type="checkbox"
                 :id="id"
@@ -13,7 +13,7 @@
             />
             <label
                 :for="id"
-                class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"
+                class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer"
             ></label>
         </div>
     </div>
@@ -75,7 +75,7 @@
     }
 
   .toggle-checkbox:checked + .toggle-label {
-    @apply bg-blue-500;
+    background: #204eb2;
   }
 
   .toggle-checkbox:checked + .toggle-label::before {
@@ -83,7 +83,8 @@
   }
 
   .toggle-checkbox:focus + .toggle-label {
-    @apply ring-2 ring-blue-200;
+    @apply ring-2;
+    background: #204eb2;
   }
 
   .toggle-label {
@@ -94,9 +95,9 @@
     content: "";
     position: absolute;
     top: 1px;
-    left: 0;
-    height: 1.4rem;
-    width: 1.4rem;
+    left: 1px;
+    height: 1.1rem;
+    width: 1.1rem;
     background-color: white;
     border-radius: 9999px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
