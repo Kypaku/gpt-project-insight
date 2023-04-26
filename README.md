@@ -13,7 +13,7 @@ This project generates documentation recursively using the OpenAI API. To use th
 <img src="https://i.ibb.co/Vxt6v4g/68747470733a2f2f646f776e6c6f616465722e6469736b2e79616e6465782e72752f707265766965772f3232393838316162.webp" width="500">
 
 ### Insight
-<img src="https://i.ibb.co/P9vNPK3/2023-04-26-21-34-13.png" width="500">
+<img src="https://i.ibb.co/6Yfn6Mb/2023-04-26-21-42-05.png" width="500">
 
 ## Project setup
 ```
