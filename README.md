@@ -3,6 +3,7 @@
 * [Run Electron app](#run-electron-app)
 * [Generate using CLI](#generate-using-cli)
 * [Config and Settings](#config-and-options)
+* [Examples](#examples)
 
 This project generates documentation recursively using the OpenAI API. To use this application, you need to have an API Key for the [Open AI API](https://platform.openai.com/)
 
@@ -69,6 +70,25 @@ one token
 *  --model <model>                  The model to use
 *  -h, --help                       display help for command
   
+##Examples
+###Prompt: 
+```
+Make the footer sticky
+```
+Model: GPT-4
+<img src="https://i.ibb.co/X3G0VRb/localhost-8083-2.png" width="500">
   
-
+###Prompt: 
+```
+How to install the project?
+```
+Model: GPT-4
+<img src="https://i.ibb.co/K2K7bCK/localhost-8083-3.png" width="500">
+  
+###Prompt: 
+```
+How to create a script: npm run build_engine
+```
+Model: GPT-3.5
+<img src="https://i.ibb.co/sjYgBmf/localhost-8083-4.png" width="500">
   
