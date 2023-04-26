@@ -4,13 +4,14 @@
         <button class="p-1 bg-gray-200 mr-2 rounded" @click="openLink('https://platform.openai.com/account/usage')">OpenAI Page</button>
         <button class="p-1 bg-gray-200 mr-2 rounded" @click="openLink('https://github.com/Kypaku/gpt-files-documentation')">Repo</button>
         <button class="p-1 bg-gray-200 mr-2 rounded" @click="clearCache">Clear Cache</button>
+        <button class="p-1 bg-gray-200 mr-2 rounded" @click="openDevTools">Open Dev Tools</button>
     </div>
-</template> 
+</template>
 
 <script lang='ts'>
     import { defineComponent, PropType } from 'vue'
     import ls from 'local-storage'
-    import { shell } from 'electron'
+    import { remote, shell } from 'electron'
 
     export default defineComponent({
         props: {
@@ -21,13 +22,17 @@
         },
         data() {
             return {
-
+                shell
             }
         },
         computed: {
 
         },
         methods: {
+            openDevTools() {
+                remote.getCurrentWindow().webContents.toggleDevTools()
+            },
+
             clearCache() {
                 ls("dir", "")
                 ls("apiKey", "")
