@@ -1,4 +1,4 @@
-# Recursive documentation generator
+# GPT Projects Insight
 * [Project setup](#project-setup)
 * [Run Electron app](#run-electron-app)
 * [Generate using CLI](#generate-using-cli)
