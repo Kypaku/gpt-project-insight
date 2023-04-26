@@ -25,7 +25,7 @@ npm install
 npm run electron:serve
 ```
 
-<img src="https://i.ibb.co/MZ2hgcw/localhost-8083.png" width="500">
+<img src="https://i.ibb.co/Lr54gDg/localhost-8088-5.png" width="500">
 
 ## Generate using CLI
 
