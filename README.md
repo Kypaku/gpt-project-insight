@@ -1,14 +1,19 @@
-# GPT Projects Insight
+# GPT Project Insight
 * [Project setup](#project-setup)
 * [Run Electron app](#run-electron-app)
 * [Generate using CLI](#generate-using-cli)
 * [Config and Settings](#config-and-options)
+* [Examples](#examples)
 
-This project generates documentation recursively using the OpenAI API. To use this application, you need to have an API Key for the [Open AI API](https://platform.openai.com/)
+An engine for generating recursive documentation and using it to work on a project with ChatGPT. To use this application, you need to have an API Key for the [Open AI API](https://platform.openai.com/)
 
 ## How it works
-<img src="https://i.ibb.co/Vxt6v4g/68747470733a2f2f646f776e6c6f616465722e6469736b2e79616e6465782e72752f707265766965772f3232393838316162.webp" width="500">
 
+### Documentation
+<img src="https://i.ibb.co/Vxt6v4g/68747470733a2f2f646f776e6c6f616465722e6469736b2e79616e6465782e72752f707265766965772f3232393838316162.webp" width="440">
+
+### Insight
+<img src="https://i.ibb.co/6Yfn6Mb/2023-04-26-21-42-05.png" width="440">
 
 ## Project setup
 ```
@@ -20,7 +25,7 @@ npm install
 npm run electron:serve
 ```
 
-<img src="https://i.ibb.co/MZ2hgcw/localhost-8083.png" width="500">
+<img src="https://i.ibb.co/Lr54gDg/localhost-8088-5.png" width="500">
 
 ## Generate using CLI
 
@@ -69,6 +74,25 @@ one token
 *  --model <model>                  The model to use
 *  -h, --help                       display help for command
   
+## Examples
+### Prompt: 
+```
+Make the footer sticky
+```
+### Model: GPT-4
+<img src="https://i.ibb.co/X3G0VRb/localhost-8083-2.png" width="500">
   
-
+### Prompt: 
+```
+How to install the project?
+```
+### Model: GPT-4
+<img src="https://i.ibb.co/K2K7bCK/localhost-8083-3.png" width="500">
+  
+### Prompt: 
+```
+How to create a script: npm run build_engine
+```
+### Model: GPT-3.5
+<img src="https://i.ibb.co/sjYgBmf/localhost-8083-4.png" width="500">
   
