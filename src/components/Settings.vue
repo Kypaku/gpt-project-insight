@@ -119,7 +119,7 @@
 
 <style lang="scss" scoped>
     ::v-deep .settings{
-        width: 400px
+        width: 100%;
     }
 
 </style>

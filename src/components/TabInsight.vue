@@ -12,25 +12,25 @@
         <InputTextarea v-model:value="prompt" class="w-full" :rows="3"/>
         <button @click="setToDefault" class="underline text-sm" >Set to default</button>
         <ToggleSwitch class="mt-2" v-model:value="includeFiles" :label="`Include files (+${lengthToTokensCount(filesStr.length)} tokens)`" />
-        <ToggleSwitch
+        <!-- <ToggleSwitch
             class="mt-2"
             v-model:value="includeSize"
             :label="`Include size (+${sizeSize} tokens)`"
-            @update:value="val => updateFilesStr('size', val)" />
+            @update:value="val => updateFilesStr('size', val)" /> -->
         <ToggleSwitch
             class="mt-2"
             v-model:value="includeDescription"
             :label="`Include description (+${descriptionSize} tokens)`"
             @update:value="val => updateFilesStr('description', val)" />
         <ToggleSwitch class="mt-2" v-model:value="includeContent" :label="`Include content (+${lengthToTokensCount(contentStr.length)} tokens)`" />
-        <Accordeon title="Files" class="bg-gray-100 rounded mt-2" v-if="includeFiles">
-            <InputTextarea v-model:value="filesStr" class="mt-2 w-full" :rows="10" />
-        </Accordeon>
-        <Accordeon title="Content" class="bg-gray-100 rounded mt-2"  v-if="includeContent">
-            <InputTextarea v-model:value="contentStr" class="mt-2 w-full text-xs" :rows="10"/>
-        </Accordeon>
-        <div class="stat flex flex-col mt-2 text-sm">
-            <div>
+        <FilesInsight v-model:value="filesStr" v-if="includeFiles" @toggleDescription="({file, value}) => updateFilesStr('description', value, file)"/>
+        <ContentInsight
+            v-model:value="contentStr"
+            v-if="includeContent"
+            :documentation="documentation"
+            :dir="dir"/>
+        <div class="stat flex flex mt-2 text-sm">
+            <div class="mr-4" >
                 Tokens: ~{{ promptSize }}
             </div>
             <div>
@@ -43,17 +43,17 @@
             v-if="!descriptionSize" />
         <div class="buttons mt-2">
             <button
-                class="px-2 py-1 rounded mb-2 mr-2"
+                class="px-2 py-1 rounded btn-run-files mb-2 mr-2"
                 :disabled="isFilesLoading || isLoading"
-                :class="isFilesLoading ? 'opacity-50 bg-green-200' : 'bg-green-200'"
+                :class="isFilesLoading ? 'opacity-50' : ''"
                 @click="askFiles()">
                 Ask for files
                 <!-- {{isFilesLoading ? 'Stop' : 'Ask for files'}} -->
             </button>
             <button
-                class="px-4 py-1 rounded mb-2 mr-2"
+                class="px-4 py-1 rounded mb-2 mr-2 btn-run"
                 :disabled="isLoading || isFilesLoading"
-                :class="isLoading ? 'opacity-50 bg-green-300' : 'bg-green-300'"
+                :class="isLoading ? 'opacity-50' : ''"
                 @click="ask()">
                 <b><!--{{isLoading ? 'Stop' : 'Run'}} -->Run</b>
             </button>
@@ -103,6 +103,12 @@
     import ResultFiles from '@/components/insight/ResultFiles.vue'
     import { readFile } from '@/../helpers/node_gm'
     import Result from '@/components/insight/Result.vue'
+    import FilesInsight from '@/components/insight/FilesInsight.vue'
+    import ContentInsight from '@/components/insight/ContentInsight.vue'
+    import path from 'path' 
+    
+
+    export const ENDOFFILE = ' ###ENDOF' + 'FILE###'
 
     export default defineComponent({
         props: {
@@ -120,6 +126,8 @@
             },
         },
         components: {
+            ContentInsight,
+            FilesInsight,
             Result,
             ResultFiles,
             ToggleSwitch,
@@ -198,7 +206,7 @@
                     this.includeContent = true
                 }
                 this.contentStr += `\n${file}:\n`
-                this.contentStr += readFile(file)
+                this.contentStr += readFile(path.resolve(this.dir, file)) + '\n' + ENDOFFILE
             },
             getTokensShift(): number {
                 return +(ls as any)('maxTokensShift') || 300
@@ -224,7 +232,8 @@
                         }).join("\n")
                     } else {
                         this.filesStr = this.filesStr.split("\n").map(f => {
-                            return f.replace(/\sDescription:\s.+/, "")
+                            const filePath = f.split(" ")[0]
+                            return (file ? filePath === file : true) ? f.replace(/\sDescription:\s.+/, "") : f
                         }).join("\n")
                     }
                 }
@@ -307,6 +316,15 @@
     </script>
 
 <style lang="scss" scoped>
+    .btn-run-files{
+        background: #92d2c9;
+    }
+
+    .btn-run{
+        background: #20b29e;
+        color: whitesmoke;
+    }
+
     .result{
         white-space: pre-line;
     }

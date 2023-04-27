@@ -6,8 +6,8 @@
         <div class="config flex-center">
             <span class="text-sm" :class="{'underline cursor-pointer': config}" @click="openConfig"> {{ configSource }}</span>
             <button class="ml-1" v-if="config"  @click="$emit('delConfig')" >✕</button>
-            <button class="px-3 py-1 text-sm rounded bg-indigo-300 ml-2" @click="$emit('loadConfig')">Load config</button>
-            <button v-if="configChanged || !config" class="px-3 py-1 text-sm rounded bg-indigo-300 ml-2" @click="$emit('saveConfig')">
+            <button class="px-3 py-1 text-sm rounded blue-button ml-2" @click="$emit('loadConfig')">Load config</button>
+            <button v-if="configChanged || !config" class="px-3 py-1 text-sm rounded blue-button ml-2" @click="$emit('saveConfig')">
                 Save config <span v-if="configChanged">*</span>
             </button>
         </div>
@@ -55,5 +55,9 @@
     </script>
 
 <style lang="scss" scoped>
+    .blue-button{
+        color: white;
+        background: #204eb2;
+    }
 
 </style>

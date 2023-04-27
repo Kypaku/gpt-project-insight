@@ -9,4 +9,5 @@ export interface IFile {
     prompt?: string
     used?: boolean
     promise?: Promise<DescriptionResponse>
+    content?: string
 }

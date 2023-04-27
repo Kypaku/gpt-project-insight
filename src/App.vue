@@ -21,7 +21,7 @@
                 @saveConfig="saveConfig"
                 :configChanged="configChanged" />
             <Settings
-                class="mt-2 mb-2"
+                class="mt-2 mb-2 w-1/2"
                 :defaultConfig="localStorageConfig"
                 :config="config"
                 @update:value="val => updateSettings(val)" />
@@ -45,8 +45,8 @@
                 :dir="dir"
                 :key="dir"
             />
-            <TheFooter/>
         </div>
+        <TheFooter class="w-full" />
     </div>
 </template>
 
