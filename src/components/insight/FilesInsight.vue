@@ -70,6 +70,11 @@
     </script>
 
 <style lang="scss" scoped>
+    .files-editor{
+        max-height: 400px;
+        overflow-y: scroll;
+    }
+
     ::v-deep.files-accorderon{
         .tab__content {
             padding: 0;

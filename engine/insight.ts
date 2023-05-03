@@ -56,6 +56,7 @@ Use the format: file1, file2, ...
 ${(filesStr || contentStr) ? 'To answer' : ''}
 ${filesStr ? 'Use the list of files:\n' + filesStr : ''}
 ${contentStr ? 'Use the content:\n' + contentStr : ''}
+P.S: Use original file paths.
 `
         console.log("insight.ask", {thePromptLength: lengthToTokensCount(thePrompt.length)})
         const res = await getAnswer(thePrompt, {timeout: 120000, max_tokens: Math.floor(4097 - lengthToTokensCount(thePrompt.length) - (opts?.maxTokensShift || 300)), ...opts})
