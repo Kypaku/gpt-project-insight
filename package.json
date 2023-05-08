@@ -16,7 +16,7 @@
     "autoprefixer": "^9.8.8",
     "commander": "^10.0.0",
     "core-js": "^3.6.5",
-    "gpt-simple-api-ts": "^1.0.17",
+    "gpt-simple-api-ts": "^1.0.18",
     "local-storage": "^2.0.0",
     "postcss": "^7.0.39",
     "readline": "^1.3.0",

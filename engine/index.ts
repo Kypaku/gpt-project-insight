@@ -6,6 +6,7 @@ import { getParentFolders, getUpdatedParentFolders } from "../helpers"
 
 export interface DocumentationGeneratorOptions {
     maxQueries?: number
+    maxTokensModel?: number
     apiKey?: string
     cli?: boolean
     maxTokens?: number

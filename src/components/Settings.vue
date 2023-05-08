@@ -15,6 +15,12 @@
                 @update:value="val => $emit('update:value', {...(config || defaultConfig), model: val} )" />
             <InputText
                 class="mt-2"
+                label="Max Tokens Model"
+                :value="(config as any)?.maxTokensModel || (defaultConfig as any).maxTokensModel"
+                :placeholder="(defaultConfig as any).maxTokensModel || 4097"
+                @update:value="val => $emit('update:value', {...(config || defaultConfig), maxTokensModel: +val} )" />
+            <InputText
+                class="mt-2"
                 label="Max Tokens File"
                 :value="(config as any)?.maxTokensFile || (defaultConfig as any).maxTokensFile"
                 :placeholder="(defaultConfig as any).maxQueries || 150"
@@ -42,7 +48,7 @@
             -->
             <InputText
                 class="mt-2"
-                label="Max Tokens Shift"
+                label="Max Tokens Shift (Increase this value if you get 'Max tokens exceeded' error)"
                 v-model:value="maxTokensShift"
                 :placeholder="'100'"
                 @update:value="val =>  ls('maxTokensShift', +val)" /> 
