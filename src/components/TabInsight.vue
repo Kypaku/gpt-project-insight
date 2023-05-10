@@ -55,7 +55,9 @@
                 :disabled="isLoading || isFilesLoading"
                 :class="isLoading ? 'opacity-50' : ''"
                 @click="ask()">
-                <b><!--{{isLoading ? 'Stop' : 'Run'}} -->Run</b>
+                <b><!--{{isLoading ? 'Stop' : 'Run'}} -->Run <span v-show="loadingTime" class="font-normal" >
+                    ({{ loadingTime.toFixed(1) }}s)</span>
+                </b>
             </button>
             <button
                 v-if="result"
@@ -74,6 +76,7 @@
 
         <ResultFiles
             class="result mt-2"
+            ref="resultFilesRef"
             :content="resultFiles"
             v-if="resultFiles"
             :files="files"
@@ -84,6 +87,7 @@
             @addFileContent="file => addFileToContentStr(file)"
         />
         <Result
+            ref="resultRef"
             :content="result"
             v-if="result"
             class="mt-2"
@@ -144,6 +148,7 @@
         },
         data() {
             return {
+                loadingInterval: null,
                 showExamples: false,
                 examples: [
                     'Make the footer sticky',
@@ -167,6 +172,7 @@
                 bytesPerToken,
                 notEnoughTokens: false,
                 lengthToTokensCount,
+                loadingTime: 0,
             }
         },
         computed: {
@@ -198,9 +204,15 @@
         },
         methods: {
             saveResult() {
-                
-            },
 
+            },
+            scrollToResult() {
+                if (this.result) {
+                    this.$refs.resultRef.$el.scrollIntoView({ behavior: 'smooth' })
+                } else if (this.resultFiles) {
+                    this.$refs.resultFilesRef.$el.scrollIntoView({ behavior: 'smooth' })
+                }
+            },
             setToDefault() {
                 this.includeContent = false
                 this.includeDescription = false
@@ -265,6 +277,9 @@
                     const maxTokensShift = this.getTokensShift()
                     this.insight = new Insight([], options)
                     this.resultFiles = await this.insight.askFiles(this.prompt, { filesStr: this.filesStr, maxTokensShift, ...this.config, timeout: this.config.insightTimeout || 120000, })
+                    setTimeout(() => {
+                        this.scrollToResult()
+                    }, 0)
                 } catch (e) {
                     console.error("catch askFiles", { e })
                     if (e.response?.data?.error?.message) {
@@ -282,6 +297,10 @@
             },
             async ask() {
                 try {
+                    this.loadingTime = 0
+                    this.loadingInterval = setInterval(() => {
+                        this.loadingTime += 0.1
+                    }, 100)
                     this.isLoading = true
                     this.error = ''
                     this.notEnoughTokens = false
@@ -303,6 +322,9 @@
 
                     }
                     this.result = await this.insight.ask(this.prompt, askOptions)
+                    setTimeout(() => {
+                        this.scrollToResult()
+                    }, 0)
                 } catch (e) {
                     console.error("catch ask", { e })
                     if (e.response?.data?.error?.message) {
@@ -316,6 +338,7 @@
                     }
                 } finally {
                     this.isLoading = false
+                    clearInterval(this.loadingInterval)
                 }
             },
 
