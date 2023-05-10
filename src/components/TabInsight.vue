@@ -57,6 +57,13 @@
                 @click="ask()">
                 <b><!--{{isLoading ? 'Stop' : 'Run'}} -->Run</b>
             </button>
+            <button
+                v-if="result"
+                class="px-2 py-1 rounded btn-save-result mb-2 mr-2"
+                :disabled="!result"
+                @click="saveResult()">
+                Save Result
+            </button>
         </div>
         <Error :value="error" v-if="error" class="mt-2"  />
         <Warning
@@ -105,8 +112,7 @@
     import Result from '@/components/insight/Result.vue'
     import FilesInsight from '@/components/insight/FilesInsight.vue'
     import ContentInsight from '@/components/insight/ContentInsight.vue'
-    import path from 'path' 
-    
+    import path from 'path'
 
     export const ENDOFFILE = ' ###ENDOF' + 'FILE###'
 
@@ -167,7 +173,7 @@
             maxTokens(): number {
                 return this.config?.maxTokensModel || maxTokens
             },
-           
+
             files(): string[] {
                 return this.documentation.map(f => f.path)
             },
@@ -191,6 +197,10 @@
             }
         },
         methods: {
+            saveResult() {
+                
+            },
+
             setToDefault() {
                 this.includeContent = false
                 this.includeDescription = false

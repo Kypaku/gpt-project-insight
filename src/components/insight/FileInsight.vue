@@ -33,7 +33,6 @@
         data() {
             return {
                 showDescription: false,
-
             }
         },
         computed: {

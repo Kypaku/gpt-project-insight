@@ -3,8 +3,13 @@
         <div class="w-full text-right px-2">
             <button class="text-sm underline"  @click="showRaw = !showRaw" >{{showRaw ? 'Hide' : 'Show'}} raw text</button>
         </div>
+        <input
+            type="search"
+            v-model="searchQuery"
+            placeholder="Search files..."
+            class="search-files w-full mb-2 py-1 px-2" />
         <div class="files-editor" v-if="!showRaw">
-            <List :items="files" @add="val => $emit('update:value', val.name + '\n' + value)" :hideTopAdd="true">
+            <List :items="filteredFiles" @add="val => $emit('update:value', val.name + '\n' + value)" :hideTopAdd="true">
                 <template #default="{item, index}">
                     <div class="flex-center-between w-full">
                         <div class="flex-grow file p-2">
@@ -61,7 +66,7 @@
             return {
                 lengthToTokensCount,
                 showRaw: false,
-
+                searchQuery: '',
             }
         },
         computed: {
@@ -74,6 +79,11 @@
                         content: index !== -1
                     }
                 })
+            },
+            filteredFiles(): IFile[] {
+                if (!this.searchQuery) return this.files
+                const query = this.searchQuery.toLowerCase()
+                return this.files.filter(file => file.path.toLowerCase().includes(query))
             },
         },
         methods: {
@@ -95,6 +105,10 @@
     </script>
 
 <style lang="scss" scoped>
+    .search-files{
+        border-bottom: 1px solid #ccc;
+    }
+
     .files-editor{
         max-height: 400px;
     overflow-y: scroll;
