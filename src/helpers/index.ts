@@ -1,3 +1,6 @@
+const { exec } = require('child_process')
+const fs = require('fs')
+const path = require('path')
 // replace all files in text with string <a>file</a>
 export function wrapFilesInString(text: string, files: string[]): string {
     return text.replaceAll(new RegExp(files.join('|'), 'g'), (match) => {
@@ -10,3 +13,4 @@ export function indexesOf(string: string, substring: string): number[] {
     while ((i = string.indexOf(substring, i + 1)) >= 0) a.push(i)
     return a
 }
+

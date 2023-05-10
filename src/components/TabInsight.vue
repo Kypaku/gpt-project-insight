@@ -251,7 +251,7 @@
 
                     const maxTokensShift = this.getTokensShift()
                     this.insight = new Insight([], options)
-                    this.resultFiles = await this.insight.askFiles(this.prompt, { filesStr: this.filesStr, maxTokensShift, ...this.config, timeout: this.config.insightTimeout, })
+                    this.resultFiles = await this.insight.askFiles(this.prompt, { filesStr: this.filesStr, maxTokensShift, ...this.config, timeout: this.config.insightTimeout || 120000, })
                 } catch (e) {
                     console.error("catch askFiles", { e })
                     if (e.response?.data?.error?.message) {
@@ -286,7 +286,7 @@
                         contentStr: this.includeContent ? this.contentStr : undefined,
                         maxTokensShift,
                         ...this.config,
-                        timeout: this.config.insightTimeout,
+                        timeout: this.config.insightTimeout || 120000,
 
                     }
                     this.result = await this.insight.ask(this.prompt, askOptions)

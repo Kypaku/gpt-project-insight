@@ -22,7 +22,8 @@
         },
         data() {
             return {
-                shell
+                shell,
+                hasVSCode: false,
             }
         },
         computed: {
@@ -46,6 +47,26 @@
             reload() {
                 location.reload()
             },
+        },
+
+        created () {
+            const { exec } = require('child_process')
+
+            exec('which code', (error, stdout, stderr) => {
+                if (error) {
+                    console.error(`exec error: ${error}`)
+                    return
+                }
+
+                if (stdout.trim() !== '') {
+                    this.hasVSCode = true
+                } else {
+                    this.hasVSCode = false
+                }
+            })
+        },
+        mounted () {
+
         },
     })
 

@@ -12,6 +12,7 @@ export interface InsightOptions {
     mode?: 'singlePrompt' | 'chat'
     maxTokensShift?: number
     timeout?: number
+    maxTokensModel?: number
 }
 
 export class Insight {
@@ -42,7 +43,7 @@ Use the format: file1, file2, ...
 // If you have enough information, you can answer the question.
         // call the first prompt
         console.log("insight.askFiles", {thePromptLength: lengthToTokensCount(thePrompt.length)})
-        const res = await getAnswer(thePrompt, {timeout: 120000, max_tokens: Math.floor(4097 - lengthToTokensCount(thePrompt.length) - (opts?.maxTokensShift || 300)), ...opts})
+        const res = await getAnswer(thePrompt, {timeout: 120000, max_tokens: Math.floor((opts?.maxTokensModel || 4097) - lengthToTokensCount(thePrompt.length) - (opts?.maxTokensShift || 300)), ...opts})
         return res || ''
     }
 
@@ -59,7 +60,7 @@ ${contentStr ? 'Use the content:\n' + contentStr : ''}
 P.S: Use original file paths.
 `
         console.log("insight.ask", {thePromptLength: lengthToTokensCount(thePrompt.length)})
-        const res = await getAnswer(thePrompt, {timeout: 120000, max_tokens: Math.floor(4097 - lengthToTokensCount(thePrompt.length) - (opts?.maxTokensShift || 300)), ...opts})
+        const res = await getAnswer(thePrompt, {timeout: 120000, max_tokens: Math.floor((opts?.maxTokensModel || 4097) - lengthToTokensCount(thePrompt.length) - (opts?.maxTokensShift || 300)), ...opts})
         return res || ''
     }
 
