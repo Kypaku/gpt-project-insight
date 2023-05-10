@@ -159,12 +159,15 @@
                 prompt: "",
                 insight: null as Insight | null,
                 bytesPerToken,
-                maxTokens,
                 notEnoughTokens: false,
                 lengthToTokensCount,
             }
         },
         computed: {
+            maxTokens(): number {
+                return this.config?.maxTokensModel || maxTokens
+            },
+           
             files(): string[] {
                 return this.documentation.map(f => f.path)
             },

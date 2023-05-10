@@ -5,6 +5,7 @@
         <button class="p-1 bg-gray-200 mr-2 rounded-sm" @click="openLink('https://github.com/Kypaku/gpt-files-documentation')">Repo</button>
         <button class="p-1 bg-gray-200 mr-2 rounded-sm" @click="clearCache">Clear Cache</button>
         <button class="p-1 bg-gray-200 mr-2 rounded-sm" @click="openDevTools">Open Dev Tools</button>
+        <button class="p-1 bg-gray-200 mr-2 rounded-sm" v-if="hasVSCode" @click="openVSCode">VSCode</button>
     </div>
 </template>
 
@@ -30,6 +31,11 @@
 
         },
         methods: {
+            openVSCode() {
+                const { exec } = require('child_process')
+                exec('code .')
+            },
+
             openDevTools() {
                 remote.getCurrentWindow().webContents.toggleDevTools()
             },
