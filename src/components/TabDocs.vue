@@ -40,6 +40,7 @@
             :prevResult="prevResult"
             :isUpdateLoading="isUpdateLoading"
             :config="config"/>
+        <ProjectDescription/>
     </div>
 </template>
 
@@ -54,6 +55,7 @@
     import { remote } from 'electron'
     import { resFile } from '../App.vue'
     import ls from 'local-storage'
+    import ProjectDescription from './ProjectDescription.vue'
 
     export const maxTokens = 4097
     export const bytesPerToken = 4
@@ -79,6 +81,7 @@
 
         },
         components: {
+            ProjectDescription,
             Files
         },
         data() {
