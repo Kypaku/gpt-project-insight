@@ -18,6 +18,11 @@
                 {{ action.name }}
             </button>
         </div>
+        <button
+            class="action text-sm px-2 py-1 rounded-lg mb-2 mr-2"
+            @click="copyResult">
+            Copy Result
+        </button>
     </div>
 </template>
 
@@ -29,6 +34,7 @@
     import { indexesOf } from '@/helpers'
 
     import path from 'path'
+    import { copy } from '@/../helpers'
 
     export default defineComponent({
         props: {
@@ -101,6 +107,9 @@
             },
         },
         methods: {
+            copyResult() {
+                copy(this.content)
+            },
 
         },
     })

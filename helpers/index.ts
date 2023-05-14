@@ -130,3 +130,39 @@ export function exclude (files: IFile[], excludes: string, opts: Partial<Documen
 export function lengthToTokensCount(l: number): number {
     return Math.ceil(l / 4)
 }
+
+export const copyToClipboard = (str: string) => {
+    const el = document.createElement("textarea")
+    el.value = str
+    el.setAttribute("readonly", "")
+    el.style.position = "absolute"
+    el.style.left = "-9999px"
+    document.body.appendChild(el)
+    let selected: Range|boolean = false
+    const selection = document.getSelection()
+    if (selection != null) {
+        selected = selection.rangeCount > 0 ? selection.getRangeAt(0) : false
+    }
+    el.select()
+    document.execCommand("copy")
+    document.body.removeChild(el)
+    if (selected && selection) {
+        selection.removeAllRanges()
+        selection.addRange(selected)
+    }
+}
+
+export const copy = (content: string) => {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(content || "")
+            .then(() => {
+                console.log("Text copied to clipboard")
+                // toast("The link copied in to clipboard", { position: "bottom-right", theme: "colored" })
+            })
+            .catch((error) => {
+                console.error("Error copying text: ", error)
+            })
+    } else {
+        copyToClipboard(content || "")
+    }
+}
