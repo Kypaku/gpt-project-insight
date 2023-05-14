@@ -40,7 +40,7 @@
             :prevResult="prevResult"
             :isUpdateLoading="isUpdateLoading"
             :config="config"/>
-        <ProjectDescription/>
+        <!-- <ProjectDescription/> -->
     </div>
 </template>
 
