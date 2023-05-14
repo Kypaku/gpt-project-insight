@@ -61,7 +61,7 @@
             </button>
             <button
                 v-if="result"
-                class="px-2 py-1 rounded btn-save-result mb-2 mr-2"
+                class="px-2 py-1 rounded btn-save-result mb-2 mr-2 bg-blue-400"
                 :disabled="!result"
                 @click="saveResult()">
                 Save Result
@@ -98,6 +98,7 @@
 </template>
 
 <script lang='ts'>
+    import { ROOT_DIR } from './../helpers'
     import { defineComponent, PropType } from 'vue'
 
     import InputTextarea from './misc/InputTextarea.vue'
@@ -112,7 +113,7 @@
     import { lengthToTokensCount } from '@/../helpers'
     import { DocumentationGeneratorOptions } from 'engine'
     import ResultFiles from '@/components/insight/ResultFiles.vue'
-    import { readFile } from '@/../helpers/node_gm'
+    import { readFile, writeFileJSON } from '@/../helpers/node_gm'
     import Result from '@/components/insight/Result.vue'
     import FilesInsight from '@/components/insight/FilesInsight.vue'
     import ContentInsight from '@/components/insight/ContentInsight.vue'
@@ -204,7 +205,7 @@
         },
         methods: {
             saveResult() {
-
+                writeFileJSON(path.resolve(ROOT_DIR, 'data', `result_${+new Date()}.json`), {dir: this.dir, result: this.result})
             },
             scrollToResult() {
                 if (this.result) {
@@ -346,6 +347,7 @@
 
         created () {
             this.filesStr = this.files.join("\n")
+            console.log("After saveResult() in methods", { ROOT_DIR })
         },
     })
 

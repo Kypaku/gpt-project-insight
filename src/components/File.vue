@@ -2,7 +2,7 @@
     <Accordeon class="file gap-4 w-full" :class="{'hover:bg-gray-50': !(!file.description && file.state !== 'error')}"  :disabled="!file.description && file.state !== 'error'">
         <template #title>
             <div class="flex items-center" >
-                <div class="path mr-4" >
+                <div class="path mr-4 text-sm" >
                     {{ file.path }}
                 </div>
                 <div class="text-sm" :class="{'text-green-500': file.state === 'done', 'text-red-500': file.state === 'error'}">

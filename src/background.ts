@@ -5,10 +5,12 @@ import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 import * as path from 'path'
 const isDevelopment = process.env.NODE_ENV !== 'production'
+const lockApp = app.requestSingleInstanceLock()
+
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
-    { scheme: 'app', privileges: { secure: true, standard: true } }
+    { scheme: 'gptpi', privileges: { secure: true, standard: true } }
 ])
 
 async function createWindow () {
@@ -26,16 +28,35 @@ async function createWindow () {
         }
     })
     win.setMenuBarVisibility(false)
-
+    if (!lockApp) {
+        app.quit()
+    } else {
+        app.on('second-instance', (ev, argv, workDir) => {
+            win.webContents.send('data', { externalRoute: argv[argv.length - 1] })
+            if (win) {
+                if (win.isMinimized()) win.restore()
+                win.focus()
+            }
+        })
+    }
     if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
         await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL as string)
         // if (!process.env.IS_TEST) win.webContents.openDevTools()
     } else {
-        createProtocol('app')
+        createProtocol('gptpi')
         // Load the index.html when not in development
-        win.loadURL('app://./index.html')
+        win.loadURL('gptpi://./index.html')
     }
+
+}
+
+if (process.defaultApp) {
+    if (process.argv.length >= 2) {
+        app.setAsDefaultProtocolClient('gptpi', process.execPath, [path.resolve(process.argv[1])])
+    }
+} else {
+    app.setAsDefaultProtocolClient('gptpi')
 }
 
 // Quit when all windows are closed.
