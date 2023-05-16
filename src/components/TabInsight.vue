@@ -1,22 +1,10 @@
 <template>
     <div class="tab-insight w-full">
-        <div>
-            <button @click="showExamples = !showExamples" class="underline text-sm" >{{showExamples ? 'Hide' : 'Show'}} examples</button>
-        </div>
-        <div class="examples text-sm" v-if="showExamples">
-            <div class="example" v-for="(item, i) in examples" :key="i">
-                <div class="cursor-pointer" @click="prompt = item">{{item}}</div>
-            </div>
-        </div>
+        <Examples @apply="val => (prompt = val)" />
         <b>Prompt</b>
         <InputTextarea v-model:value="prompt" class="w-full" :rows="3"/>
         <button @click="setToDefault" class="underline text-sm" >Set to default</button>
         <ToggleSwitch class="mt-2" v-model:value="includeFiles" :label="`Include files (+${lengthToTokensCount(filesStr.length)} tokens)`" />
-        <!-- <ToggleSwitch
-            class="mt-2"
-            v-model:value="includeSize"
-            :label="`Include size (+${sizeSize} tokens)`"
-            @update:value="val => updateFilesStr('size', val)" /> -->
         <ToggleSwitch
             class="mt-2"
             v-model:value="includeDescription"
@@ -66,13 +54,19 @@
                 @click="saveResult()">
                 Save Result
             </button>
+            <button
+                v-if="!result"
+                class="px-2 py-1 rounded btn-save-result mb-2 mr-2 bg-blue-400"
+                @click="loadResultDialog()">
+                Load Result
+            </button>
         </div>
+        <Warning class="mt-2" v-if="resultSaved" :value="'The result saved in the file: ' + resultSaved"/>
         <Error :value="error" v-if="error" class="mt-2"  />
         <Warning
             class="mt-2"
             :value="'If you have not enough tokens for the prompt you need to increase \'Max Tokens Shift\' in the settings.'"
             v-if="notEnoughTokens" />
-        <!-- enable \'accurate token counting\' or -->
 
         <ResultFiles
             class="result mt-2"
@@ -113,11 +107,13 @@
     import { lengthToTokensCount } from '@/../helpers'
     import { DocumentationGeneratorOptions } from 'engine'
     import ResultFiles from '@/components/insight/ResultFiles.vue'
-    import { readFile, writeFileJSON } from '@/../helpers/node_gm'
+    import { readFile, readFileJSON, writeFileJSON } from '@/../helpers/node_gm'
     import Result from '@/components/insight/Result.vue'
     import FilesInsight from '@/components/insight/FilesInsight.vue'
     import ContentInsight from '@/components/insight/ContentInsight.vue'
     import path from 'path'
+    import Examples from './Examples.vue'
+    import { remote } from 'electron'
 
     export const ENDOFFILE = ' ###ENDOF' + 'FILE###'
 
@@ -137,6 +133,7 @@
             },
         },
         components: {
+            Examples,
             ContentInsight,
             FilesInsight,
             Result,
@@ -149,14 +146,8 @@
         },
         data() {
             return {
+                resultSaved: '',
                 loadingInterval: null,
-                showExamples: false,
-                examples: [
-                    'Make the footer sticky',
-                    'How to install the project',
-                    'How to create a script: npm run ',
-                    'Create README.md and its content',
-                ],
                 resultFiles: "",
                 error: "",
                 contentStr: "",
@@ -204,8 +195,29 @@
             }
         },
         methods: {
+            loadResultDialog() {
+                const file = remote.dialog.showOpenDialogSync({
+                    properties: ['openFile'],
+                    filters: [
+                        { name: 'JSON', extensions: ['json'] },
+                    ]
+                })
+                if (file) {
+                    this.loadResult(file[0])
+                }
+            },
+
             saveResult() {
-                writeFileJSON(path.resolve(ROOT_DIR, 'data', `result_${+new Date()}.json`), {dir: this.dir, result: this.result})
+                const file = path.resolve(ROOT_DIR, 'data', `result_${+new Date()}.json`)
+                writeFileJSON(file, { dir: this.dir, result: this.result })
+                this.resultSaved = file
+                setTimeout(() => {
+                    this.resultSaved = ''
+                }, 0)
+            },
+            loadResult(file) {
+                const data = readFileJSON(file)
+                this.result = data.result
             },
             scrollToResult() {
                 if (this.result) {

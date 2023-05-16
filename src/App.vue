@@ -40,6 +40,7 @@
             />
             <TabInsight
                 v-if="tab === 'insight'"
+                ref="tabInsight"
                 :documentation="$refs?.tabDocs?.done ? $refs?.tabDocs?.mergedFiles : (prevResult.length ? prevResult : files)"
                 :config="currentConfig"
                 :dir="dir"
