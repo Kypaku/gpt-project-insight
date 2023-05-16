@@ -24,6 +24,11 @@ npm install
 ```
 npm run electron:serve
 ```
+### Open By deeplink
+
+```
+gptpi://index?dir=C:/path/to/project
+```
 
 <img src="https://i.ibb.co/Lr54gDg/localhost-8088-5.png" width="500">
 
