@@ -41,7 +41,7 @@
             <TabInsight
                 v-if="tab === 'insight'"
                 ref="tabInsight"
-                :documentation="$refs?.tabDocs?.done ? $refs?.tabDocs?.mergedFiles : (prevResult.length ? prevResult : files)"
+                :documentation="insightDocumentation"
                 :config="currentConfig"
                 :dir="dir"
                 :key="dir"
@@ -52,7 +52,7 @@
 </template>
 
 <script lang="ts">
-    import { debounce, size } from 'lodash'
+        import {debounce, size, includes} from 'lodash'
     import { defineComponent } from 'vue'
     import InputText from './components/misc/InputText.vue'
     import ls from 'local-storage'
@@ -109,6 +109,11 @@
             }
         },
         computed: {
+            insightDocumentation(): IFile[] {
+                const res = this.$refs?.tabDocs?.done ? this.$refs?.tabDocs?.mergedFiles : (this.prevResult.length ? this.prevResult : this.files)
+                return [...res, ...this.files.filter((file) => res.map((re) => re.path).includes(file.path) === false)]
+            },
+
             currentConfig() {
                 return {
                     ...this.localStorageConfig,

@@ -27,4 +27,8 @@ export async function handleExternalRoutes(app: ComponentPublicInstance<{}, {}, 
     if ((params.result && app.$root.$refs?.tabInsight as any)?.loadResult) {
         (app.$root.$refs.tabInsight as any).loadResult(params.result)
     }
+    if (params.config) {
+        (app.$root as any).loadConfigRaw(params.config)
+        location.reload()
+    }
 }

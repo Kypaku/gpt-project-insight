@@ -213,7 +213,7 @@
                 this.resultSaved = file
                 setTimeout(() => {
                     this.resultSaved = ''
-                }, 0)
+                }, 5000)
             },
             loadResult(file) {
                 const data = readFileJSON(file)
