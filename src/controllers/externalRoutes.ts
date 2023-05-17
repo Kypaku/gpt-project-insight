@@ -22,13 +22,20 @@ export async function handleExternalRoutes(app: ComponentPublicInstance<{}, {}, 
     if (params.dir) {
         ls("dir", params.dir);
         (app.$root as any).dir = params.dir
-        location.reload()
     }
     if ((params.result && app.$root.$refs?.tabInsight as any)?.loadResult) {
-        (app.$root.$refs.tabInsight as any).loadResult(params.result)
+        setTimeout(() => {
+            (app.$root.$refs.tabInsight as any).loadResult(params.result)
+        }, 0)
     }
     if (params.config) {
-        (app.$root as any).loadConfigRaw(params.config)
-        location.reload()
+        setTimeout(() => {
+            (app.$root as any).loadConfigRaw(params.config)
+        }, 0)
+    }
+    if (params.prompt) {
+        setTimeout(() => {
+            (app.$root.$refs.tabInsight as any).prompt = params.prompt
+        }, 0)
     }
 }
