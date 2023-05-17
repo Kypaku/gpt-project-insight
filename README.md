@@ -27,7 +27,7 @@ npm run electron:serve
 ### Open By deeplink
 
 ```
-gptpi://index?dir=C:/path/to/project
+gptpi://index?dir=C:/path/to/project&config=C:/path/to/config.json&result=C:/path/to/result.json&prompt=PROMPT
 ```
 
 <img src="https://i.ibb.co/Lr54gDg/localhost-8088-5.png" width="500">
