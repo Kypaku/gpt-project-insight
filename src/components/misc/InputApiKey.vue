@@ -23,7 +23,7 @@
         },
         data() {
             return {
-                apiKey: ls("apiKey") as unknown as string || '',
+                apiKey: ls("apiKey") as unknown as string || '' || process.env.OPENAI_KEY,
                 ls
             }
         },

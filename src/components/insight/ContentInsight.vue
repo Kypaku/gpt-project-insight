@@ -39,7 +39,7 @@
     import InputTextarea from '../misc/InputTextarea.vue'
     import { IFile } from 'types'
     import List from '../misc/list/List.vue'
-    import { readFile } from '@/../helpers/node_gm'
+    import { getFileSize, readFile } from '@/../helpers/node_gm'
     import path from 'path'
     import { ENDOFFILE } from '../TabInsight.vue'
     import { lengthToTokensCount } from '@/../helpers'
@@ -75,7 +75,7 @@
                     const index = this.value.indexOf(file.path + ":")
                     return {
                         path: file.path,
-                        size: file.size,
+                        size: file.fullPath ? getFileSize(file.fullPath) : file.size,
                         content: index !== -1
                     }
                 })

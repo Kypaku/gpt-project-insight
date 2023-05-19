@@ -13,11 +13,10 @@ protocol.registerSchemesAsPrivileged([
     { scheme: 'gptpi', privileges: { secure: true, standard: true } }
 ])
 
-async function createWindow () {
-    // Create the browser window.
+function createWindowOne () {
     const iconPath = path.join(__dirname, '..', 'public', 'icon.png')
-    console.log("createWindow", { iconPath })
-    const win = new BrowserWindow({
+    
+    return new BrowserWindow({
         width: 600,
         height: 800,
         icon: iconPath,
@@ -27,11 +26,19 @@ async function createWindow () {
             nodeIntegration: true,
         }
     })
+}
+
+async function createWindow () {
+    // Create the browser window.
+    const win = createWindowOne()
     win.setMenuBarVisibility(false)
     if (!lockApp) {
         app.quit()
     } else {
-        app.on('second-instance', (ev, argv, workDir) => {
+        app.on('second-instance', async (ev, argv, workDir) => {
+            const win = createWindowOne()
+            win.setMenuBarVisibility(false)
+            await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL as string)
             win.webContents.send('data', { externalRoute: argv[argv.length - 1] })
             if (win) {
                 if (win.isMinimized()) win.restore()
@@ -48,7 +55,6 @@ async function createWindow () {
         // Load the index.html when not in development
         win.loadURL('gptpi://./index.html')
     }
-
 }
 
 if (process.defaultApp) {

@@ -61,7 +61,11 @@
                 Load Result
             </button>
         </div>
-        <Warning class="mt-2" v-if="resultSaved" :value="'The result saved in the file: ' + resultSaved"/>
+        <Warning
+            class="mt-2"
+            v-if="resultSaved"
+            :value="'The result saved in the file: ' + resultSaved"
+            @click="clearSaveMessageTimeout()"/>
         <Error :value="error" v-if="error" class="mt-2"  />
         <Warning
             class="mt-2"
@@ -146,6 +150,7 @@
         },
         data() {
             return {
+                saveMessageTimeout: null,
                 resultSaved: '',
                 loadingInterval: null,
                 resultFiles: "",
@@ -195,6 +200,10 @@
             }
         },
         methods: {
+            clearSaveMessageTimeout() {
+                clearTimeout(this.saveMessageTimeout)
+            },
+
             loadResultDialog() {
                 const file = remote.dialog.showOpenDialogSync({
                     properties: ['openFile'],
@@ -211,7 +220,7 @@
                 const file = path.resolve(ROOT_DIR, 'data', `result_${+new Date()}.json`)
                 writeFileJSON(file, { dir: this.dir, result: this.result })
                 this.resultSaved = file
-                setTimeout(() => {
+                this.saveMessageTimeout = setTimeout(() => {
                     this.resultSaved = ''
                 }, 5000)
             },
