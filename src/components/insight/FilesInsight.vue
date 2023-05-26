@@ -3,6 +3,10 @@
         <div class="w-full text-right px-2">
             <button class="text-sm underline"  @click="showRaw = !showRaw" >{{showRaw ? 'Hide' : 'Show'}} raw text</button>
         </div>
+        <!-- <ToggleSwitch
+            label="Only files from documentation"
+            v-model="onlyDocsFiles"
+        /> -->
         <input
             type="search"
             v-model="searchQuery"
@@ -36,6 +40,7 @@
     import InputTextarea from '../misc/InputTextarea.vue'
     import { IFile } from '@/../types'
     import FileInsight from './FileInsight.vue'
+    import ToggleSwitch from '../misc/ToggleSwitch.vue'
 
     export default defineComponent({
         props: {
@@ -47,10 +52,12 @@
             Accordeon,
             InputTextarea,
             List,
+            ToggleSwitch
         },
         // emits: ['update:modelValue'], this.$emit('update:modelValue', title)
         data() {
             return {
+                onlyDocsFiles: false,
                 showRaw: false,
                 searchQuery: '',
 

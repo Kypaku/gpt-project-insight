@@ -1,12 +1,12 @@
 <template>
     <div>
-        <b >Result: </b>
-        <div class="result text-sm mt-2 bg-yellow-50 p-2 rounded" >
+        <b>Result: </b>
+        <div class="result text-sm mt-2 bg-yellow-50 p-2 rounded">
             <template v-for="(segment, i) in segments">
                 <div :key="i" class="code-block mb-1" v-if="segment.isCode">
                     <pre class="overflow-auto max-h-80"><code>{{ segment.text.trim()}}</code></pre>
                 </div>
-                <span :key="i + 'text'" v-else>{{ segment.text }}</span>
+                <span :key="i + 'text'" v-else v-html="renderLinks(segment.text)"></span>
             </template>
         </div>
         <div class="actions flex-center flex-wrap mt-2">
@@ -71,7 +71,7 @@
                 return sortByReverse(this.files.filter((file) => file !== '.'), (f) => f.length)
             },
             matchedFiles(): StringIndexes[] {
-                const content = this.content // For tests: `I need a description of the file "src\\components\\TheFooter.vue" to determine how "src\\components\\TheFooter.vue to make "engine\\index.ts" the footer sticky. "src\\components"`
+                const content = this.content
                 const res = []
                 this.sortedFiles.forEach((sortedFile) => {
                     const indexes = indexesOf(content, sortedFile)
@@ -110,11 +110,18 @@
             copyResult() {
                 copy(this.content)
             },
-
+            renderLinks(text) {
+                this.uniqMatchedFiles.forEach((matchedFile) => {
+                    const filePath = path.resolve(this.dir, matchedFile.string)
+                    const link = `<a href="#" @click.prevent="openFile('${filePath}')">${matchedFile.string}</a>`
+                    text = text.replace(matchedFile.string, link)
+                })
+                return text
+            },
         },
     })
 
-    </script>
+</script>
 
 <style lang="scss" scoped>
     .result{

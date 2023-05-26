@@ -102,7 +102,7 @@
                 const content = this.content // For tests: `I need a description of the file "src\\components\\TheFooter.vue" to determine how "src\\components\\TheFooter.vue to make "engine\\index.ts" the footer sticky. "src\\components"`
                 const res = []
                 this.sortedFiles.forEach((sortedFile) => {
-                    const indexes = indexesOf(content, sortedFile)
+                    const indexes = indexesOf(content.replaceAll('\\', '/'), sortedFile.replaceAll('\\', '/'))
                     if (indexes.length) {
                         res.push({
                             string: sortedFile,

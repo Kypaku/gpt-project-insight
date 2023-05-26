@@ -11,7 +11,7 @@
                 class="mt-2"
                 label="Model"
                 :value="(config as any)?.model || (defaultConfig as any).model"
-                :placeholder="(defaultConfig as any).maxQueries || 'gpt-3.5-turbo-0301'"
+                :placeholder="(defaultConfig as any).model || 'gpt-3.5-turbo-0301'"
                 @update:value="val => $emit('update:value', {...(config || defaultConfig), model: val} )" />
             <InputText
                 class="mt-2"
@@ -23,19 +23,19 @@
                 class="mt-2"
                 label="Max Tokens File"
                 :value="(config as any)?.maxTokensFile || (defaultConfig as any).maxTokensFile"
-                :placeholder="(defaultConfig as any).maxQueries || 150"
+                :placeholder="(defaultConfig as any).maxTokensFile || 150"
                 @update:value="val => $emit('update:value', {...(config || defaultConfig), maxTokensFile: +val} )" />
             <InputText
                 class="mt-2"
                 label="Max Tokens Directory"
                 :value="(config as any)?.maxTokensDir || (defaultConfig as any).maxTokensDir"
-                :placeholder="(defaultConfig as any).maxQueries || 300"
+                :placeholder="(defaultConfig as any).maxTokensDir || 300"
                 @update:value="val => $emit('update:value', {...(config || defaultConfig), maxTokensDir: +val} )" />
             <InputText
                 class="mt-2"
                 label="Temperature"
                 :value="(config as any)?.temperature || (defaultConfig as any).temperature"
-                :placeholder="(defaultConfig as any).maxQueries || 0"
+                :placeholder="(defaultConfig as any).temperature || 0"
                 @update:value="val => $emit('update:value', {...(config || defaultConfig), temperature: +val} )" />
             <!-- <ToggleSwitch
                 class="mt-2"

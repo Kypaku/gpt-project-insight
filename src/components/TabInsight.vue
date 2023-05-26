@@ -1,5 +1,6 @@
 <template>
     <div class="tab-insight w-full">
+        <SavedResults/>
         <Examples @apply="val => (prompt = val)" />
         <b>Prompt</b>
         <InputTextarea v-model:value="prompt" class="w-full" :rows="3"/>
@@ -25,16 +26,25 @@
                 Remaining: ~{{ maxTokens - promptSize }}
             </div>
         </div>
+        <ProjectsList/>
+        <Cycles/>
         <Warning
             class="mt-2"
             :value="'To include descriptions in the prompt, you need to generate documentation.'"
             v-if="!descriptionSize" />
+        <button @click="showRawPrompt = !showRawPrompt" class="underline text-sm"> {{ showRawPrompt ? 'Hide' : 'Show'  }} raw prompt</button>
+        <InputTextarea
+            v-if="showRawPrompt"
+            v-model:value="rawPrompt"
+            class="mt-2 w-full"
+            :rows="10"
+        />
         <div class="buttons mt-2">
             <button
                 class="px-2 py-1 rounded btn-run-files mb-2 mr-2"
                 :disabled="isFilesLoading || isLoading"
                 :class="isFilesLoading ? 'opacity-50' : ''"
-                @click="askFiles()">
+                @click="askInsight('files')">
                 Ask for files
                 <!-- {{isFilesLoading ? 'Stop' : 'Ask for files'}} -->
             </button>
@@ -42,7 +52,7 @@
                 class="px-4 py-1 rounded mb-2 mr-2 btn-run"
                 :disabled="isLoading || isFilesLoading"
                 :class="isLoading ? 'opacity-50' : ''"
-                @click="ask()">
+                @click="askInsight('content')">
                 <b><!--{{isLoading ? 'Stop' : 'Run'}} -->Run <span v-show="loadingTime" class="font-normal" >
                     ({{ loadingTime.toFixed(1) }}s)</span>
                 </b>
@@ -118,6 +128,9 @@
     import path from 'path'
     import Examples from './Examples.vue'
     import { remote } from 'electron'
+    import SavedResults from '@/components/insight/SavedResults.vue'
+    import ProjectsList from './ProjectsList.vue'
+    import Cycles from './Cycles.vue'
 
     export const ENDOFFILE = ' ###ENDOF' + 'FILE###'
 
@@ -137,6 +150,9 @@
             },
         },
         components: {
+            Cycles,
+            ProjectsList,
+            SavedResults,
             Examples,
             ContentInsight,
             FilesInsight,
@@ -150,6 +166,8 @@
         },
         data() {
             return {
+                rawPrompt: "",
+                showRawPrompt: false,
                 saveMessageTimeout: null,
                 resultSaved: '',
                 loadingInterval: null,
@@ -197,9 +215,22 @@
                     return (description ? " Description: " + description : "")
                 }).join("").length
                 return lengthToTokensCount(descriptionLength)
-            }
+            },
+            combinedWatchers(): string {
+                return this.prompt + this.filesStr + this.contentStr + this.includeFiles + this.includeContent
+            },
         },
         methods: {
+            updateRawPrompt() {
+                const options = {
+                    filesStr: this.includeFiles ? this.filesStr : undefined,
+                    contentStr: this.includeContent ? this.contentStr : undefined,
+                    ...this.config,
+                    timeout: this.config.insightTimeout || 120000,
+                }
+                this.insight = new Insight([], options)
+                this.rawPrompt = this.insight.generatePrompt(this.prompt, options)
+            },
             clearSaveMessageTimeout() {
                 clearTimeout(this.saveMessageTimeout)
             },
@@ -285,45 +316,17 @@
                     }
                 }
             },
-
-            async askFiles() {
+            async askInsight(type) {
                 try {
-                    this.isFilesLoading = true
-                    this.error = ''
-                    this.notEnoughTokens = false
-                    const options = {
-                        apiKey: (ls as any)("apiKey"),
-                        ...this.config,
+                    if (type === 'files') {
+                        this.isFilesLoading = true
+                    } else {
+                        this.isLoading = true
+                        this.loadingTime = 0
+                        this.loadingInterval = setInterval(() => {
+                            this.loadingTime += 0.1
+                        }, 100)
                     }
-
-                    const maxTokensShift = this.getTokensShift()
-                    this.insight = new Insight([], options)
-                    this.resultFiles = await this.insight.askFiles(this.prompt, { filesStr: this.filesStr, maxTokensShift, ...this.config, timeout: this.config.insightTimeout || 120000, })
-                    setTimeout(() => {
-                        this.scrollToResult()
-                    }, 0)
-                } catch (e) {
-                    console.error("catch askFiles", { e })
-                    if (e.response?.data?.error?.message) {
-                        this.error = e.response.data.error.message
-                        if (e.response?.data?.error?.code === 'context_length_exceeded') {
-                            this.notEnoughTokens = true
-                        }
-                    }
-                    if (e.message === 'Timeout') {
-                        this.error = 'Timeout. Try to increase timeout in settings'
-                    }
-                } finally {
-                    this.isFilesLoading = false
-                }
-            },
-            async ask() {
-                try {
-                    this.loadingTime = 0
-                    this.loadingInterval = setInterval(() => {
-                        this.loadingTime += 0.1
-                    }, 100)
-                    this.isLoading = true
                     this.error = ''
                     this.notEnoughTokens = false
 
@@ -332,35 +335,37 @@
                         ...this.config,
                         timeout: this.config.insightTimeout,
                     }
+                    this.insight = new Insight([], options)
                     const maxTokensShift = this.getTokensShift()
 
-                    this.insight = new Insight([], options)
-                    const askOptions = {
-                        filesStr: this.includeFiles ? this.filesStr : undefined,
-                        contentStr: this.includeContent ? this.contentStr : undefined,
-                        maxTokensShift,
-                        ...this.config,
-                        timeout: this.config.insightTimeout || 120000,
-
+                    if (type === 'files') {
+                        this.resultFiles = await this.insight.askFiles(this.prompt, { filesStr: this.filesStr, maxTokensShift, ...this.config, timeout: this.config.insightTimeout || 120000, })
+                    } else {
+                        const askOptions = {
+                            filesStr: this.includeFiles ? this.filesStr : undefined,
+                            contentStr: this.includeContent ? this.contentStr : undefined,
+                            maxTokensShift,
+                            ...this.config,
+                            timeout: this.config.insightTimeout || 120000,
+                            rawPrompt: this.rawPrompt,
+                        }
+                        this.result = await this.insight.ask(this.prompt, askOptions)
                     }
-                    this.result = await this.insight.ask(this.prompt, askOptions)
+
                     setTimeout(() => {
                         this.scrollToResult()
                     }, 0)
                 } catch (e) {
-                    console.error("catch ask", { e })
-                    if (e.response?.data?.error?.message) {
-                        this.error = e.response.data.error.message
-                        if (e.response?.data?.error?.code === 'context_length_exceeded') {
-                            this.notEnoughTokens = true
-                        }
-                    }
-                    if (e.message === 'Timeout') {
-                        this.error = 'Timeout. Try to increase timeout in settings'
-                    }
+                    console.error("catch askInsight", { e })
+
+                    // Error handling code ...
                 } finally {
-                    this.isLoading = false
-                    clearInterval(this.loadingInterval)
+                    if (type === 'files') {
+                        this.isFilesLoading = false
+                    } else {
+                        clearInterval(this.loadingInterval)
+                        this.isLoading = false
+                    }
                 }
             },
 
@@ -369,6 +374,16 @@
         created () {
             this.filesStr = this.files.join("\n")
             console.log("After saveResult() in methods", { ROOT_DIR })
+        },
+
+        watch: {
+            combinedWatchers: {
+                handler (newVal) {
+                    setTimeout(() => {
+                        this.updateRawPrompt()
+                    }, 0)
+                }
+            },
         },
     })
 

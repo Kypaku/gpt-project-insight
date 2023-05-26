@@ -13,6 +13,7 @@ export interface InsightOptions {
     maxTokensShift?: number
     timeout?: number
     maxTokensModel?: number
+    rawPrompt?: string
 }
 
 export class Insight {
@@ -51,17 +52,26 @@ Use the format: file1, file2, ...
         if (this.opts.apiKey) {
             gptAPI.setApiKey(this.opts.apiKey)
         }
+
+        const thePrompt = opts?.rawPrompt || this.generatePrompt(prompt, opts)
+        console.log("insight.ask", {thePromptLength: lengthToTokensCount(thePrompt.length)})
+        const res = this.getAnswer(thePrompt, opts)
+        return res || ''
+    }
+
+    public async getAnswer(prompt: string, opts?: InsightOptions): Promise<string> {
+        return await getAnswer(prompt, {timeout: 120000, max_tokens: Math.floor((opts?.maxTokensModel || 4097) - lengthToTokensCount(prompt.length) - (opts?.maxTokensShift || 300)), ...opts})
+    }
+
+    public generatePrompt(prompt: string, opts?: InsightOptions): string {
         const filesStr = opts?.filesStr || (opts?.fileNames || []).join('\n')
         const contentStr = opts?.contentStr || ''
-        const thePrompt = `${prompt}
-${(filesStr || contentStr) ? 'To answer' : ''}
-${filesStr ? 'Use the list of files:\n' + filesStr : ''}
-${contentStr ? 'Use the content:\n' + contentStr : ''}
-P.S: Use original file paths.
-`
-        console.log("insight.ask", {thePromptLength: lengthToTokensCount(thePrompt.length)})
-        const res = await getAnswer(thePrompt, {timeout: 120000, max_tokens: Math.floor((opts?.maxTokensModel || 4097) - lengthToTokensCount(thePrompt.length) - (opts?.maxTokensShift || 300)), ...opts})
-        return res || ''
+
+        return `${prompt}
+        ${(filesStr || contentStr) ? 'To answer' : ''}
+        ${filesStr ? 'Use the list of files:\n' + filesStr : ''}
+        ${contentStr ? 'Use the content:\n' + contentStr : ''}
+        `
     }
 
     public parseFiles(res: string): string[] {
