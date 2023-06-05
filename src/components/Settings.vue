@@ -51,7 +51,7 @@
                 label="Max Tokens Shift (Increase this value if you get 'Max tokens exceeded' error)"
                 v-model:value="maxTokensShift"
                 :placeholder="'100'"
-                @update:value="val =>  ls('maxTokensShift', +val)" /> 
+                @update:value="val =>  ls('maxTokensShift', +val)" />
             <InputText
                 class="mt-2"
                 label="Documentation Timeout (ms)"
@@ -64,6 +64,14 @@
                 :value="(config as any)?.insightTimeout || (defaultConfig as any).insightTimeout"
                 :placeholder="(defaultConfig as any).insightTimeout || 120000"
                 @update:value="val => $emit('update:value', {...(config || defaultConfig), insightTimeout: +val} )" />
+            <!-- <div class="dirs mt-4">
+                <b class="" >Allowed directories:</b>
+                <List :addPlaceholder="'/path/to/dir'" :items="settings?.dirs || defaultSettings?.dirs || []" @add="({name, pos}) => setSettings('dirs', [name, ...(settings?.dirs || defaultSettings?.dirs || [])])">
+                    <template #default="{item}">
+                        {{ item  }}
+                    </template>
+                </List> 
+            </div> -->
         </Accordeon>
     </div>
 </template>
@@ -78,6 +86,7 @@
     import { callPySync, isPythonInstalled } from '@/../helpers/node_gm'
     import Warning from './misc/Warning.vue'
     import * as path from 'path'
+    import List from './misc/list/List.vue'
 
     export default defineComponent({
         props: {
@@ -88,6 +97,7 @@
             defaultConfig: Object as PropType<DocumentationGeneratorOptions>,
         },
         components: {
+            List,
             InputText,
             Accordeon,
             ToggleSwitch,

@@ -1,6 +1,7 @@
 <template>
     <div class="tab-insight w-full">
-        <SavedResults/>
+        <SavedResults :dir="dir"/>
+        <ProjectsList/>
         <Examples @apply="val => (prompt = val)" />
         <b>Prompt</b>
         <InputTextarea v-model:value="prompt" class="w-full" :rows="3"/>
@@ -12,26 +13,20 @@
             :label="`Include description (+${descriptionSize} tokens)`"
             @update:value="val => updateFilesStr('description', val)" />
         <ToggleSwitch class="mt-2" v-model:value="includeContent" :label="`Include content (+${lengthToTokensCount(contentStr.length)} tokens)`" />
+        <ToggleSwitch class="mt-2" v-model:value="showCycles" :label="`Show cycles`" />
         <FilesInsight v-model:value="filesStr" v-if="includeFiles" @toggleDescription="({file, value}) => updateFilesStr('description', value, file)"/>
         <ContentInsight
             v-model:value="contentStr"
             v-if="includeContent"
             :documentation="documentation"
             :dir="dir"/>
-        <div class="stat flex flex mt-2 text-sm">
-            <div class="mr-4" >
-                Tokens: ~{{ promptSize }}
-            </div>
-            <div>
-                Remaining: ~{{ maxTokens - promptSize }}
-            </div>
-        </div>
-        <ProjectsList/>
-        <Cycles/>
+        <Info :promptSize="promptSize" :maxTokens="maxTokens"  />
+        <!-- :price="price" -->
         <Warning
             class="mt-2"
             :value="'To include descriptions in the prompt, you need to generate documentation.'"
             v-if="!descriptionSize" />
+        <Cycles :files="files" v-if="showCycles"/>
         <button @click="showRawPrompt = !showRawPrompt" class="underline text-sm"> {{ showRawPrompt ? 'Hide' : 'Show'  }} raw prompt</button>
         <InputTextarea
             v-if="showRawPrompt"
@@ -74,8 +69,9 @@
         <Warning
             class="mt-2"
             v-if="resultSaved"
-            :value="'The result saved in the file: ' + resultSaved"
-            @click="clearSaveMessageTimeout()"/>
+            @click="clearSaveMessageTimeout()">
+            The result saved in the file: <span class="underline" @click="copy(resultSaved)" >{{resultSaved}}</span>
+        </Warning>
         <Error :value="error" v-if="error" class="mt-2"  />
         <Warning
             class="mt-2"
@@ -118,7 +114,7 @@
     import { IFile } from 'types'
     import Error from './misc/Error.vue'
     import Warning from './misc/Warning.vue'
-    import { lengthToTokensCount } from '@/../helpers'
+    import { copy, lengthToTokensCount } from '@/../helpers'
     import { DocumentationGeneratorOptions } from 'engine'
     import ResultFiles from '@/components/insight/ResultFiles.vue'
     import { readFile, readFileJSON, writeFileJSON } from '@/../helpers/node_gm'
@@ -128,9 +124,10 @@
     import path from 'path'
     import Examples from './Examples.vue'
     import { remote } from 'electron'
-    import SavedResults from '@/components/insight/SavedResults.vue'
-    import ProjectsList from './ProjectsList.vue'
-    import Cycles from './Cycles.vue'
+    import SavedResults, { IResult } from '@/components/insight/SavedResults.vue'
+    import ProjectsList from './insight/ProjectsList.vue'
+    import Cycles from './insight/Cycles.vue'
+    import Info from './Info.vue'
 
     export const ENDOFFILE = ' ###ENDOF' + 'FILE###'
 
@@ -150,6 +147,7 @@
             },
         },
         components: {
+            Info,
             Cycles,
             ProjectsList,
             SavedResults,
@@ -166,6 +164,8 @@
         },
         data() {
             return {
+                copy,
+                showCycles: false,
                 rawPrompt: "",
                 showRawPrompt: false,
                 saveMessageTimeout: null,
@@ -249,7 +249,7 @@
 
             saveResult() {
                 const file = path.resolve(ROOT_DIR, 'data', `result_${+new Date()}.json`)
-                writeFileJSON(file, { dir: this.dir, result: this.result })
+                writeFileJSON(file, { dir: this.dir, result: this.result, prompt: this.rawPrompt } as IResult)
                 this.resultSaved = file
                 this.saveMessageTimeout = setTimeout(() => {
                     this.resultSaved = ''

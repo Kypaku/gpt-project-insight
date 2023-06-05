@@ -4,7 +4,7 @@
         <div class="result text-sm mt-2 bg-yellow-50 p-2 rounded">
             <template v-for="(segment, i) in segments">
                 <div :key="i" class="code-block mb-1" v-if="segment.isCode">
-                    <pre class="overflow-auto max-h-80"><code>{{ segment.text.trim()}}</code></pre>
+                    <pre class="overflow-auto max-h-80"><code v-html="highlightCode(segment.text.trim())"></code></pre>
                 </div>
                 <span :key="i + 'text'" v-else v-html="renderLinks(segment.text)"></span>
             </template>
@@ -32,7 +32,8 @@
     import { StringIndexes, Action } from './ResultFiles.vue'
     import { openFile, sortByReverse } from '@/../helpers/node_gm'
     import { indexesOf } from '@/helpers'
-
+    import Prism from 'prismjs'
+    import 'prismjs/themes/prism-tomorrow.css'
     import path from 'path'
     import { copy } from '@/../helpers'
 
@@ -112,11 +113,18 @@
             },
             renderLinks(text) {
                 this.uniqMatchedFiles.forEach((matchedFile) => {
-                    const filePath = path.resolve(this.dir, matchedFile.string)
-                    const link = `<a href="#" @click.prevent="openFile('${filePath}')">${matchedFile.string}</a>`
-                    text = text.replace(matchedFile.string, link)
+                    const fileRawPath = matchedFile.string
+                    const filePath = path.resolve(this.dir, fileRawPath)
+                    const link = `<a href="#" @click.prevent="openFile('${filePath}')">${fileRawPath}</a>`
+                    text = text
+                        .replaceAll(fileRawPath, link)
+                        .replaceAll(matchedFile.string.replaceAll('/', '\\'), link)
+                        .replaceAll(matchedFile.string.replaceAll('\\', '/'), link)
                 })
                 return text
+            },
+            highlightCode(code): string {
+                return Prism.highlight(code, Prism.languages.javascript, 'javascript')
             },
         },
     })
