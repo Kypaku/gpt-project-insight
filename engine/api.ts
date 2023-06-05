@@ -52,7 +52,7 @@ export const getFolderDescription = async (file: IFile, descriptions: IFileDescr
 }
 
 export const getAnswer = async (prompt: string, opts?: any): Promise<string> => {
-    const gptRequest = gptAPI.getFirst(prompt, opts)
+    const gptRequest = opts?.stream === false ? gptAPI.getFirst(prompt, opts) : gptAPI.getStream(prompt, opts?.fData, opts?.fEnd)
     const answer = await Promise.race([gptRequest, timeoutPromise(opts?.timeout || timeout)]) as any || ""
     return answer
 }

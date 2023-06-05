@@ -49,7 +49,7 @@
             <InputText
                 class="mt-2"
                 label="Max Tokens Shift (Increase this value if you get 'Max tokens exceeded' error)"
-                v-model:value="maxTokensShift"
+                :value="maxTokensShift + ''"
                 :placeholder="'100'"
                 @update:value="val =>  ls('maxTokensShift', +val)" />
             <InputText
@@ -64,13 +64,18 @@
                 :value="(config as any)?.insightTimeout || (defaultConfig as any).insightTimeout"
                 :placeholder="(defaultConfig as any).insightTimeout || 120000"
                 @update:value="val => $emit('update:value', {...(config || defaultConfig), insightTimeout: +val} )" />
+            <ToggleSwitch
+                class="mt-2"
+                :value="(config as any)?.stream || (defaultConfig as any).stream || true"
+                :label="`Enable streams`"
+                @update:value="val => $emit('update:value', {...(config || defaultConfig), stream: val})" />
             <!-- <div class="dirs mt-4">
                 <b class="" >Allowed directories:</b>
                 <List :addPlaceholder="'/path/to/dir'" :items="settings?.dirs || defaultSettings?.dirs || []" @add="({name, pos}) => setSettings('dirs', [name, ...(settings?.dirs || defaultSettings?.dirs || [])])">
                     <template #default="{item}">
                         {{ item  }}
                     </template>
-                </List> 
+                </List>
             </div> -->
         </Accordeon>
     </div>
@@ -87,14 +92,15 @@
     import Warning from './misc/Warning.vue'
     import * as path from 'path'
     import List from './misc/list/List.vue'
+    import { InsightOptions } from 'engine/insight'
 
     export default defineComponent({
         props: {
             config: {
-                type: Object as PropType<DocumentationGeneratorOptions>,
+                type: Object as PropType<DocumentationGeneratorOptions & InsightOptions>,
                 default: () => null
             },
-            defaultConfig: Object as PropType<DocumentationGeneratorOptions>,
+            defaultConfig: Object as PropType<DocumentationGeneratorOptions & InsightOptions>,
         },
         components: {
             List,

@@ -327,6 +327,10 @@
                             this.loadingTime += 0.1
                         }, 100)
                     }
+                    if (this.config.stream !== false) {
+                        this.result = ''
+                        this.resultFiles = ''
+                    }
                     this.error = ''
                     this.notEnoughTokens = false
 
@@ -337,6 +341,7 @@
                     }
                     this.insight = new Insight([], options)
                     const maxTokensShift = this.getTokensShift()
+                    let scrolled = false
 
                     if (type === 'files') {
                         this.resultFiles = await this.insight.askFiles(this.prompt, { filesStr: this.filesStr, maxTokensShift, ...this.config, timeout: this.config.insightTimeout || 120000, })
@@ -348,8 +353,16 @@
                             ...this.config,
                             timeout: this.config.insightTimeout || 120000,
                             rawPrompt: this.rawPrompt,
+                            fData: (delta) => {
+                                this.result += delta
+                                this.config.stream !== false && !scrolled && setTimeout(() => {
+                                    this.scrollToResult()
+                                    scrolled = true
+                                }, 0)
+                            }
                         }
-                        this.result = await this.insight.ask(this.prompt, askOptions)
+                        const res = await this.insight.ask(this.prompt, askOptions)
+                        this.result += res
                     }
 
                     setTimeout(() => {

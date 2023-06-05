@@ -14,6 +14,8 @@ export interface InsightOptions {
     timeout?: number
     maxTokensModel?: number
     rawPrompt?: string
+    stream?: boolean
+    fData?: any
 }
 
 export class Insight {
