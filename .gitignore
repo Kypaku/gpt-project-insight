@@ -21,6 +21,7 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+docs.ai.config.json
 
 #Electron-builder output
 /dist_electron

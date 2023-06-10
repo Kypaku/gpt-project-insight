@@ -361,8 +361,8 @@
                                 }, 0)
                             }
                         }
-                        const res = await this.insight.ask(this.prompt, askOptions)
-                        this.result += res
+                        const res = await this.insight.ask(this.prompt, askOptions);
+                        (this.config.stream === false) && (this.result = '')
                     }
 
                     setTimeout(() => {
