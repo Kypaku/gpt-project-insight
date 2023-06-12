@@ -45,10 +45,9 @@
             </button>
             <button
                 class="px-4 py-1 rounded mb-2 mr-2 btn-run"
-                :disabled="isLoading || isFilesLoading"
-                :class="isLoading ? 'opacity-50' : ''"
+                :disabled="isFilesLoading"
                 @click="askInsight('content')">
-                <b><!--{{isLoading ? 'Stop' : 'Run'}} -->Run <span v-show="loadingTime" class="font-normal" >
+                <b>{{isLoading ? 'Stop' : 'Run'}} <span v-show="loadingTime" class="font-normal" >
                     ({{ loadingTime.toFixed(1) }}s)</span>
                 </b>
             </button>
@@ -178,7 +177,7 @@
                 includeDescription: false,
                 includeSize: false,
                 filesStr: "",
-                includeFiles: true,
+                includeFiles: false,
                 result: "",
                 isLoading: false,
                 isFilesLoading: false,
@@ -317,68 +316,75 @@
                 }
             },
             async askInsight(type) {
-                try {
-                    if (type === 'files') {
-                        this.isFilesLoading = true
-                    } else {
-                        this.isLoading = true
-                        this.loadingTime = 0
-                        this.loadingInterval = setInterval(() => {
-                            this.loadingTime += 0.1
-                        }, 100)
-                    }
-                    if (this.config.stream !== false) {
-                        this.result = ''
-                        this.resultFiles = ''
-                    }
-                    this.error = ''
-                    this.notEnoughTokens = false
-
-                    const options = {
-                        apiKey: (ls as any)("apiKey"),
-                        ...this.config,
-                        timeout: this.config.insightTimeout,
-                    }
-                    this.insight = new Insight([], options)
-                    const maxTokensShift = this.getTokensShift()
-                    let scrolled = false
-
-                    if (type === 'files') {
-                        this.resultFiles = await this.insight.askFiles(this.prompt, { filesStr: this.filesStr, maxTokensShift, ...this.config, timeout: this.config.insightTimeout || 120000, })
-                    } else {
-                        const askOptions = {
-                            filesStr: this.includeFiles ? this.filesStr : undefined,
-                            contentStr: this.includeContent ? this.contentStr : undefined,
-                            maxTokensShift,
-                            ...this.config,
-                            timeout: this.config.insightTimeout || 120000,
-                            rawPrompt: this.rawPrompt,
-                            fData: (delta) => {
-                                this.result += delta
-                                this.config.stream !== false && !scrolled && setTimeout(() => {
-                                    this.scrollToResult()
-                                    scrolled = true
-                                }, 0)
-                            }
+                if (!this.isLoading) {
+                    try {
+                        if (type === 'files') {
+                            this.isFilesLoading = true
+                        } else {
+                            this.isLoading = true
+                            this.loadingTime = 0
+                            this.loadingInterval = setInterval(() => {
+                                this.loadingTime += 0.1
+                            }, 100)
                         }
-                        const res = await this.insight.ask(this.prompt, askOptions);
-                        (this.config.stream === false) && (this.result = '')
+                        if (this.config.stream !== false) {
+                            this.result = ''
+                            this.resultFiles = ''
+                        }
+                        this.error = ''
+                        this.notEnoughTokens = false
+    
+                        const options = {
+                            apiKey: (ls as any)("apiKey"),
+                            ...this.config,
+                            timeout: this.config.insightTimeout,
+                            browser: true,
+                        }
+                        this.insight = new Insight([], options)
+                        const maxTokensShift = this.getTokensShift()
+                        let scrolled = false
+    
+                        if (type === 'files') {
+                            this.resultFiles = await this.insight.askFiles(this.prompt, { filesStr: this.filesStr, maxTokensShift, ...this.config, timeout: this.config.insightTimeout || 120000, })
+                        } else {
+                            const askOptions = {
+                                browser: true,
+                                filesStr: this.includeFiles ? this.filesStr : undefined,
+                                contentStr: this.includeContent ? this.contentStr : undefined,
+                                maxTokensShift,
+                                ...this.config,
+                                timeout: this.config.insightTimeout || 120000,
+                                rawPrompt: this.rawPrompt,
+                                fData: (delta) => {
+                                    this.result += delta
+                                    this.config.stream !== false && !scrolled && setTimeout(() => {
+                                        this.scrollToResult()
+                                        scrolled = true
+                                    }, 0)
+                                }
+                            }
+                            const res = await this.insight.ask(this.prompt, askOptions);
+                            (this.config.stream === false) && (this.result = '')
+                        }
+    
+                        setTimeout(() => {
+                            this.scrollToResult()
+                        }, 0)
+                    } catch (e) {
+                        console.error("catch askInsight", { e })
+    
+                        // Error handling code ...
+                    } finally {
+                        if (type === 'files') {
+                            this.isFilesLoading = false
+                        } else {
+                            clearInterval(this.loadingInterval)
+                            this.isLoading = false
+                        }
                     }
-
-                    setTimeout(() => {
-                        this.scrollToResult()
-                    }, 0)
-                } catch (e) {
-                    console.error("catch askInsight", { e })
-
-                    // Error handling code ...
-                } finally {
-                    if (type === 'files') {
-                        this.isFilesLoading = false
-                    } else {
-                        clearInterval(this.loadingInterval)
-                        this.isLoading = false
-                    }
+                } else {
+                    this.insight.abort()
+                    this.isLoading = false
                 }
             },
 

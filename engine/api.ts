@@ -1,7 +1,9 @@
 import SimpleAPI from 'gpt-simple-api-ts'
+import SimpleAPIBrowser from 'gpt-simple-api-ts/lib/browser'
 import { IFile } from '../types'
 
 export const gptAPI = new SimpleAPI({ key: '' })
+export const gptAPIBrowser = new SimpleAPI({ key: '' })
 
 export interface IFileDescription {
     fileName: string
@@ -23,6 +25,7 @@ const timeoutPromise = (timeout) => {
 }
 
 export const getFileDescription = async (file: IFile, content: string, opts?: any): Promise<DescriptionResponse> => {
+    const api = opts?.browser ? gptAPIBrowser : gptAPI
     const prompt = `Create a short description for the file ${file.path}:
     ${content}
     `
@@ -30,12 +33,14 @@ export const getFileDescription = async (file: IFile, content: string, opts?: an
     if (opts?.model) {
         gptOpts.model = opts?.model
     }
-    const gptRequest = gptAPI.getFirst(prompt, gptOpts)
+    const gptRequest = api.getFirst(prompt, gptOpts)
     const description = (await Promise.race([gptRequest, timeoutPromise(opts?.timeout || timeout)])) as any || ""
     return { description, prompt }
 }
 
 export const getFolderDescription = async (file: IFile, descriptions: IFileDescription[], opts?: any): Promise<DescriptionResponse> => {
+    const api = opts?.browser ? gptAPIBrowser : gptAPI
+
     const prompt = `I will send you the directory name and files it contains and their's descriptions and you will have to create a short description for the directory:
         Directory name: ${file.path}
         ${descriptions.map(desc => `
@@ -46,13 +51,14 @@ export const getFolderDescription = async (file: IFile, descriptions: IFileDescr
     if (opts?.model) {
         gptOpts.model = opts?.model
     }
-    const gptRequest = gptAPI.getFirst(prompt, gptOpts)
+    const gptRequest = api.getFirst(prompt, gptOpts)
     const description = await Promise.race([gptRequest, timeoutPromise(opts?.timeout || timeout)]) as any || ""
     return { description, prompt }
 }
 
 export const getAnswer = async (prompt: string, opts?: any): Promise<string> => {
-    const gptRequest = opts?.stream === false ? gptAPI.getFirst(prompt, opts) : gptAPI.getStream(prompt, opts?.fData, opts?.fEnd, opts)
+    const api = opts?.browser ? gptAPIBrowser : gptAPI
+    const gptRequest = opts?.stream === false ? api.getFirst(prompt, opts) : api.getStream(prompt, opts?.fData, opts?.fEnd, opts)
     const answer = await Promise.race([gptRequest, timeoutPromise(opts?.timeout || timeout)]) as any || ""
     return answer
 }

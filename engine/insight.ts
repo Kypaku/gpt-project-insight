@@ -1,7 +1,7 @@
 import { lengthToTokensCount } from "../helpers"
 import { readFileJSON } from "../helpers/node_gm"
 import { IFile } from "../types"
-import { getAnswer, gptAPI } from "./api"
+import { getAnswer, gptAPI, gptAPIBrowser } from "./api"
 
 export interface InsightOptions {
     apiKey?: string
@@ -16,6 +16,7 @@ export interface InsightOptions {
     rawPrompt?: string
     stream?: boolean
     fData?: any
+    browser?: boolean
 }
 
 export class Insight {
@@ -32,6 +33,7 @@ export class Insight {
     public async askFiles(prompt: string, opts?: InsightOptions): Promise<string> {
         if (this.opts.apiKey) {
             gptAPI.setApiKey(this.opts.apiKey)
+            gptAPIBrowser.setApiKey(this.opts.apiKey)
         }
         const thePrompt = `I give a question: "${prompt}"
 And the list of files:
@@ -53,6 +55,7 @@ Use the format: file1, file2, ...
     public async ask(prompt: string, opts?: InsightOptions): Promise<string> {
         if (this.opts.apiKey) {
             gptAPI.setApiKey(this.opts.apiKey)
+            gptAPIBrowser.setApiKey(this.opts.apiKey)
         }
 
         const thePrompt = opts?.rawPrompt || this.generatePrompt(prompt, opts)
@@ -87,5 +90,11 @@ Use the format: file1, file2, ...
 
     public stop(): void {
         this.isStopped = true
+    }
+
+    //abort
+    public abort(): void {
+        gptAPI?.abortStream()
+        gptAPIBrowser?.abortStream()
     }
 }
