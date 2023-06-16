@@ -12,6 +12,7 @@
                     @update:value="updateFiles"  />
                 <button @click="selectFolder" class="btn-select bg-gray-100 mt-6" ><IconFolder/></button>
                 <button v-if="dir" @click="openFile(dir)" class="p-1 bg-gray-100 mt-6 text-sm ml-2">Open in Explorer</button>
+                <button v-if="dir" @click="openVSC(dir)" class="p-1 bg-gray-100 mt-6 text-sm ml-2">VSC</button> 
             </div>
             <Config
                 :config="config"
@@ -122,6 +123,11 @@
             },
         },
         methods: {
+            openVSC(dir: string) {
+                const { exec } = require('child_process')
+                exec(`code ${dir}`)
+            },
+           
             saveConfig() {
                 if (!this.config) {
                     const configFile = this.dir + "/docs.ai.config.json"

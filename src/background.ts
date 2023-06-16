@@ -6,7 +6,8 @@ import installExtension, { VUEJS3_DEVTOOLS } from 'electron-devtools-installer'
 import * as path from 'path'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 const lockApp = app.requestSingleInstanceLock()
-
+const { dialog } = require('electron')
+let mainWindow // Keep a global reference to avoid being garbage collected
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -15,7 +16,7 @@ protocol.registerSchemesAsPrivileged([
 
 function createWindowOne () {
     const iconPath = path.join(__dirname, '..', 'public', 'icon.png')
-    
+
     return new BrowserWindow({
         width: 600,
         height: 800,
@@ -31,6 +32,7 @@ function createWindowOne () {
 async function createWindow () {
     // Create the browser window.
     const win = createWindowOne()
+    mainWindow = win
     win.setMenuBarVisibility(false)
     if (!lockApp) {
         app.quit()
@@ -66,13 +68,31 @@ if (process.defaultApp) {
 }
 
 // Quit when all windows are closed.
-app.on('window-all-closed', () => {
+app.on('window-all-closed', (event) => {
     // On macOS it is common for applications and their menu bar
     // to stay active until the user quits explicitly with Cmd + Q
     if (process.platform !== 'darwin') {
         app.quit()
     }
+    // event.preventDefault() // Prevents the default behaviour
 })
+
+// app.on('before-quit', async (event) => {
+//     event.preventDefault() // Prevents the default quit
+//     const option = {
+//         type: 'question',
+//         buttons: ['Yes', 'No'],
+//         title: 'Confirm',
+//         message: 'Unsaved data will be lost. Are you sure you want to quit?'
+//     }
+
+//     const response = await dialog.showMessageBox(mainWindow, option)
+//     console.log("before-quit event triggered", { response })
+//     if (response.response == 0) { // If 'Yes' is clicked
+//         mainWindow = null // Dereference the window object
+//         app.quit() // Quit the app
+//     }
+// })
 
 app.on('activate', () => {
     // On macOS it's common to re-create a window in the app when the

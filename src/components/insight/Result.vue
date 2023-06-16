@@ -111,20 +111,47 @@
             copyResult() {
                 copy(this.content)
             },
+            // renderLinks(text) {
+            //     this.uniqMatchedFiles.forEach((matchedFile) => {
+            //         const fileRawPath = matchedFile.string
+            //         const filePath = path.resolve(this.dir, fileRawPath)
+            //         const link = `<a href="#" class="underline" @click.prevent="openFile('${filePath}')">${fileRawPath}</a>`
+            //         const replacers = [
+            //             fileRawPath,
+            //             fileRawPath.replaceAll('/', '\\'),
+            //             fileRawPath.replaceAll('\\', '/')
+            //         ]
+            //         console.log("After renderLinks function", {replacers});
+            //         replacers.forEach((replacer) => {
+            //             text = text.replaceAll(replacer, link)
+            //         })
+            //     })
+            //     return text
+            // },
             renderLinks(text) {
+                const replacedLinks = new Set() // set to keep track of replaced links
                 this.uniqMatchedFiles.forEach((matchedFile) => {
                     const fileRawPath = matchedFile.string
                     const filePath = path.resolve(this.dir, fileRawPath)
-                    const link = `<a href="#" @click.prevent="openFile('${filePath}')">${fileRawPath}</a>`
-                    text = text
-                        .replaceAll(fileRawPath, link)
-                        .replaceAll(matchedFile.string.replaceAll('/', '\\'), link)
-                        .replaceAll(matchedFile.string.replaceAll('\\', '/'), link)
+                    const link = `<a href="#" class="underline" @click.prevent="openFile('${filePath}')">${fileRawPath}</a>`
+                    const replacers = [
+                        fileRawPath,
+                        fileRawPath.replaceAll('/', '\\'),
+                        fileRawPath.replaceAll('\\', '/')
+                    ]
+                    console.log("After renderLinks function", { replacers })
+                    replacers.forEach((replacer) => {
+                        if (!replacedLinks.has(replacer)) { // check if link has already been replaced
+                            text = text.replaceAll(replacer, link)
+                            replacedLinks.add(replacer) // add link to set of replaced links
+                        }
+                    })
                 })
                 return text
             },
+
             highlightCode(code): string {
-                return Prism.highlight(code, Prism.languages.javascript, 'javascript')
+                return Prism.highlight(code, Prism.languages.javascript, 'javascript').replace(/\w+/, "").trim()
             },
         },
     })

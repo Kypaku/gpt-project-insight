@@ -1,6 +1,6 @@
 <template>
     <div class="tab-insight w-full">
-        <SavedResults :dir="dir"/>
+        <SavedResults :dir="dir" @select="item => loadResultByName(item)"/>
         <ProjectsList/>
         <Examples @apply="val => (prompt = val)" />
         <b>Prompt</b>
@@ -26,7 +26,7 @@
             class="mt-2"
             :value="'To include descriptions in the prompt, you need to generate documentation.'"
             v-if="!descriptionSize" />
-        <Cycles :files="files" v-if="showCycles"/>
+        <Cycles :files="files" v-if="showCycles" :config="config"/>
         <button @click="showRawPrompt = !showRawPrompt" class="underline text-sm"> {{ showRawPrompt ? 'Hide' : 'Show'  }} raw prompt</button>
         <InputTextarea
             v-if="showRawPrompt"
@@ -69,7 +69,7 @@
             class="mt-2"
             v-if="resultSaved"
             @click="clearSaveMessageTimeout()">
-            The result saved in the file: <span class="underline" @click="copy(resultSaved)" >{{resultSaved}}</span>
+            The result saved in the file: <span class="underline cursor-pointer" @click="copy(resultSaved)" >{{resultSaved}}</span>
         </Warning>
         <Error :value="error" v-if="error" class="mt-2"  />
         <Warning
@@ -195,7 +195,7 @@
             },
 
             files(): string[] {
-                return this.documentation.map(f => f.path)
+                return this.documentation
             },
 
             promptSize(): number {
@@ -220,6 +220,10 @@
             },
         },
         methods: {
+            loadResultByName(item: IResult) {
+                this.loadResult(path.resolve(ROOT_DIR, 'data', item.name))
+            },
+
             updateRawPrompt() {
                 const options = {
                     filesStr: this.includeFiles ? this.filesStr : undefined,
@@ -248,7 +252,13 @@
 
             saveResult() {
                 const file = path.resolve(ROOT_DIR, 'data', `result_${+new Date()}.json`)
-                writeFileJSON(file, { dir: this.dir, result: this.result, prompt: this.rawPrompt } as IResult)
+                writeFileJSON(file, {
+                    dir: this.dir,
+                    result: this.result,
+                    prompt: this.rawPrompt,
+                    filesStr: this.filesStr,
+                    contentStr: this.contentStr,
+                } as IResult)
                 this.resultSaved = file
                 this.saveMessageTimeout = setTimeout(() => {
                     this.resultSaved = ''
@@ -257,6 +267,9 @@
             loadResult(file) {
                 const data = readFileJSON(file)
                 this.result = data.result
+                setTimeout(() => {
+                    this.scrollToResult()
+                }, 0)
             },
             scrollToResult() {
                 if (this.result) {
@@ -333,7 +346,7 @@
                         }
                         this.error = ''
                         this.notEnoughTokens = false
-    
+
                         const options = {
                             apiKey: (ls as any)("apiKey"),
                             ...this.config,
@@ -343,7 +356,7 @@
                         this.insight = new Insight([], options)
                         const maxTokensShift = this.getTokensShift()
                         let scrolled = false
-    
+
                         if (type === 'files') {
                             this.resultFiles = await this.insight.askFiles(this.prompt, { filesStr: this.filesStr, maxTokensShift, ...this.config, timeout: this.config.insightTimeout || 120000, })
                         } else {
@@ -366,13 +379,13 @@
                             const res = await this.insight.ask(this.prompt, askOptions);
                             (this.config.stream === false) && (this.result = '')
                         }
-    
+
                         setTimeout(() => {
                             this.scrollToResult()
                         }, 0)
                     } catch (e) {
                         console.error("catch askInsight", { e })
-    
+
                         // Error handling code ...
                     } finally {
                         if (type === 'files') {

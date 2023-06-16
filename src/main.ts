@@ -3,8 +3,12 @@ import App from './App.vue'
 import './assets/tailwind.css'
 import shell, { ipcRenderer } from 'electron'
 import { handleExternalRoutes } from './controllers/externalRoutes'
+import Vue3Toasity from 'vue3-toastify'
+import 'vue3-toastify/dist/index.css'
 
-const app = createApp(App).mount('#app')
+const app = createApp(App)
+    .use(Vue3Toasity)
+    .mount('#app')
 
 document.addEventListener('keydown', function (e) {
     if (e.which === 123) {

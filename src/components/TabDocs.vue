@@ -102,7 +102,7 @@
             //     const tokensFilesSend = total(this.$refs.files?.selectedFiles?.map((selectedFile) => selectedFile.size || 0)) / bytesPerToken
             // },
             excludedFiles(): IFile[] {
-                return exclude(this.files, this.excludes, { maxTokens, bytesPerToken, maxTokensFile: this.config.maxTokensFile })
+                return exclude(this.files, this.excludes, { maxTokens: this.config.maxTokensModel || maxTokens, bytesPerToken, maxTokensFile: this.config.maxTokensFile })
             },
             prevResultDate(): number {
                 return +(getFileDate(this.dir + "/docs.ai.json") || 0)

@@ -153,11 +153,12 @@ export const copyToClipboard = (str: string) => {
 }
 
 export const copy = (content: string) => {
+    const { toast } = require("vue3-toastify")
     if (navigator.clipboard) {
         navigator.clipboard.writeText(content || "")
             .then(() => {
                 console.log("Text copied to clipboard")
-                // toast("The link copied in to clipboard", { position: "bottom-right", theme: "colored" })
+                toast("The link copied in to clipboard", { position: "bottom-right", theme: "colored" })
             })
             .catch((error) => {
                 console.error("Error copying text: ", error)

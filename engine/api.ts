@@ -1,5 +1,5 @@
 import SimpleAPI from 'gpt-simple-api-ts'
-import SimpleAPIBrowser from 'gpt-simple-api-ts/lib/browser'
+// import SimpleAPIBrowser from 'gpt-simple-api-ts/lib/browser'
 import { IFile } from '../types'
 
 export const gptAPI = new SimpleAPI({ key: '' })

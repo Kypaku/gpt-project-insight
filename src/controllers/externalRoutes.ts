@@ -21,7 +21,8 @@ export async function handleExternalRoutes(app: ComponentPublicInstance<{}, {}, 
     const params = getQueryParams(path) as any
     if (params.dir) {
         ls("dir", params.dir);
-        (app.$root as any).dir = params.dir
+        (app.$root as any).dir = params.dir;
+        (app.$root as any).updateFilesSync(params.dir)
     }
     if ((params.result && app.$root.$refs?.tabInsight as any)?.loadResult) {
         setTimeout(() => {

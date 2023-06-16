@@ -1,8 +1,14 @@
 <template>
     <Accordeon class="saved-results" title="Saved results">
-        <List :items="results">
+        <input
+            type="search"
+            v-model="searchQuery"
+            placeholder="Search files..."
+            class="search-files w-full mb-2 py-2 px-2" />
+        <button @click="(showAll = !showAll, updateResults())" class="underline" > {{ showAll  ? 'Only for current dir' : 'Show all' }}</button>
+        <List :items="filteredResults" hideTopAdd="1">
             <template #default="{item, index}">
-                <div class="saved-result">
+                <div class="saved-result cursor-pointer w-full mt-2 flex-center gap-2 justify-center" @click="$emit('select', item)">
                     <div class="saved-result__name">
                         {{item.name}}
                     </div>
@@ -49,24 +55,32 @@
         // emits: ['update:modelValue'], this.$emit('update:modelValue', title)
         data() {
             return {
+                showAll: false,
+                searchQuery: '',
                 results: [],
             }
         },
         computed: {
-
+            filteredResults(): IResult[] {
+                if (!this.searchQuery) return this.results
+                const query = this.searchQuery.toLowerCase()
+                return this.results.filter((file: IResult) => file.name.toLowerCase().includes(query))
+            },
         },
         methods: {
-
+            updateResults() {
+                getFilesFull(ROOT_DIR + '/data/').forEach((file) => {
+                    if (getBasename(file).startsWith('result_')) {
+                        const content = readFileJSON(file)
+                        if (content && (this.showAll ? true : content.dir === this.dir)) {
+                            this.results.push({ ...content, name: getBasename(file), date: getFileDate(file).toLocaleString() })
+                        }
+                    }
+                })
+            }
         },
         created() {
-            getFilesFull(ROOT_DIR + '/data/').forEach((file) => {
-                if (getBasename(file).startsWith('result_')) {
-                    const content = readFileJSON(file)
-                    if (content && content.dir === this.dir) {
-                        this.results.push({ ...content, name: getBasename(file), date: getFileDate(file).toLocaleString() })
-                    }
-                }
-            })
+            this.updateResults()
         }
     })
 
