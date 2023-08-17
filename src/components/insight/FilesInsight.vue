@@ -7,13 +7,13 @@
             label="Only files from documentation"
             v-model="onlyDocsFiles"
         /> -->
-        <input
+        <!-- <input
             type="search"
             v-model="searchQuery"
             placeholder="Search files..."
-            class="search-files w-full mb-2 py-2 px-2" />
+            class="search-files w-full mb-2 py-2 px-2" /> -->
         <div class="files-editor" v-if="!showRaw">
-            <List :items="filteredFiles" @add="val => $emit('update:value', val.name + '\n' + value)" :add-placeholder="'relative/path/to/file'">
+            <List :items="filteredFiles" :show-search="true" :searchField="'path'" @add="val => $emit('update:value', val.name + '\n' + value)" :add-placeholder="'relative/path/to/file'">
                 <template #default="{item, index}">
                     <FileInsight
                         :file="item"

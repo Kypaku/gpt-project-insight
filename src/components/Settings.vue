@@ -37,6 +37,12 @@
                 :value="(config as any)?.temperature || (defaultConfig as any).temperature"
                 :placeholder="(defaultConfig as any).temperature || 0"
                 @update:value="val => $emit('update:value', {...(config || defaultConfig), temperature: +val} )" />
+            <InputText
+                class="mt-2"
+                label="Language"
+                :value="(config as any)?.language || (defaultConfig as any).language"
+                :placeholder="(defaultConfig as any).language || 'en'"
+                @update:value="val => $emit('update:value', {...(config || defaultConfig), language: val} )" />
             <!-- <ToggleSwitch
                 class="mt-2"
                 v-model:value="enableAccurateTokenCounting"
@@ -69,14 +75,18 @@
                 :value="(config as any)?.stream || (defaultConfig as any).stream || true"
                 :label="`Enable streams`"
                 @update:value="val => $emit('update:value', {...(config || defaultConfig), stream: val})" />
-            <!-- <div class="dirs mt-4">
+            <div class="dirs mt-4">
                 <b class="" >Allowed directories:</b>
-                <List :addPlaceholder="'/path/to/dir'" :items="settings?.dirs || defaultSettings?.dirs || []" @add="({name, pos}) => setSettings('dirs', [name, ...(settings?.dirs || defaultSettings?.dirs || [])])">
+                <List
+                    :addPlaceholder="'/path/to/dir'"
+                    :items="config?.allowedDirs || (defaultConfig as any)?.allowedDirs || []"
+                >
                     <template #default="{item}">
+                        <!-- @add="({name, pos}) => setSettings('dirs', [name, ...(settings?.dirs || defaultSettings?.dirs || [])])"> -->
                         {{ item  }}
                     </template>
                 </List>
-            </div> -->
+            </div>
         </Accordeon>
     </div>
 </template>

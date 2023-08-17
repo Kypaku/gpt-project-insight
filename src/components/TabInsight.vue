@@ -96,6 +96,7 @@
             class="mt-2"
             :files="files"
             :dir="dir"
+            @update:value="val => updateResult(val)"
         />
     </div>
 </template>
@@ -199,7 +200,8 @@
             },
 
             promptSize(): number {
-                return lengthToTokensCount((this.prompt.length + (this.includeFiles ? this.filesStr.length : 0) + (this.includeContent ? this.contentStr.length : 0))) + this.getTokensShift()
+                // return lengthToTokensCount((this.prompt.length + (this.includeFiles ? this.filesStr.length : 0) + (this.includeContent ? this.contentStr.length : 0))) + this.getTokensShift()
+                return lengthToTokensCount(this.rawPrompt.length) + this.getTokensShift()
             },
             sizeSize(): number {
                 const sizeLength = this.filesStr.split("\n").map(f => {
@@ -220,6 +222,19 @@
             },
         },
         methods: {
+            updateResult(val: string) {
+                this.result = val
+            },
+
+            includeFilesContent(files: string[]) {
+                // edit contentStr
+                // '\n' + item.path + ":\n" + readFile(path.resolve(this.dir, item.path)) + '\n' + ENDOFFILE
+                this.contentStr = this.contentStr + files.map(f => '\n' + f + ":\n" + readFile(path.resolve(this.dir, f)) + '\n' + ENDOFFILE).join("")
+            },
+            updateTokensCount(rawPrompt: string) {
+
+            },
+
             loadResultByName(item: IResult) {
                 this.loadResult(path.resolve(ROOT_DIR, 'data', item.name))
             },
@@ -284,7 +299,7 @@
                 this.includeSize = false
                 this.includeFiles = true
                 this.contentStr = ""
-                this.filesStr = this.files.join("\n")
+                this.filesStr = this.files.map((file) => file.path).join("\n")
                 this.prompt = ""
                 this.result = ""
                 this.resultFiles = ""
@@ -376,7 +391,8 @@
                                     }, 0)
                                 }
                             }
-                            const res = await this.insight.ask(this.prompt, askOptions);
+                            const res = await this.insight.ask(this.prompt, askOptions)
+                            console.log("AFTER insight.ask", { res });
                             (this.config.stream === false) && (this.result = '')
                         }
 
@@ -404,7 +420,7 @@
         },
 
         created () {
-            this.filesStr = this.files.join("\n")
+            this.filesStr = this.files.map((file) => file.path).join("\n")
             console.log("After saveResult() in methods", { ROOT_DIR })
         },
 

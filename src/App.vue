@@ -2,7 +2,7 @@
     <div class="app">
         <div class="header"></div>
         <div class="main flex flex-col items-start px-4 mt-4">
-            <InputApiKey />
+            <InputApiKey @update:value="updateModels" />
             <div class="flex items-center mb-4">
                 <InputText
                     v-model:value="dir"
@@ -12,7 +12,7 @@
                     @update:value="updateFiles"  />
                 <button @click="selectFolder" class="btn-select bg-gray-100 mt-6" ><IconFolder/></button>
                 <button v-if="dir" @click="openFile(dir)" class="p-1 bg-gray-100 mt-6 text-sm ml-2">Open in Explorer</button>
-                <button v-if="dir" @click="openVSC(dir)" class="p-1 bg-gray-100 mt-6 text-sm ml-2">VSC</button> 
+                <button v-if="dir" @click="openVSC(dir)" class="p-1 bg-gray-100 mt-6 text-sm ml-2">VSC</button>
             </div>
             <Config
                 :config="config"
@@ -53,7 +53,7 @@
 </template>
 
 <script lang="ts">
-        import {debounce, size, includes} from 'lodash'
+    import { debounce, size, includes } from 'lodash'
     import { defineComponent } from 'vue'
     import InputText from './components/misc/InputText.vue'
     import ls from 'local-storage'
@@ -72,6 +72,7 @@
     import InputApiKey from '@/components/misc/InputApiKey.vue'
     import TabDocs from '@/components/TabDocs.vue'
     import TabInsight from '@/components/TabInsight.vue'
+    import SimpleGPT from 'gpt-simple-api-ts'
 
     export const resFile = path.resolve(dirname(), "./docs.ai.json")
 
@@ -107,6 +108,7 @@
                 files: [] as IFile[],
                 dir: ls("dir") as unknown as string || '',
                 ls,
+                api: null,
             }
         },
         computed: {
@@ -123,11 +125,18 @@
             },
         },
         methods: {
+            async updateModels() {
+                setTimeout(async () => {
+                    this.api = new SimpleGPT({ key: (ls as any)("apiKey") || '' })
+                    this.models = (await this.api.getModels()) || []
+                }, 0)
+            },
+
             openVSC(dir: string) {
                 const { exec } = require('child_process')
                 exec(`code ${dir}`)
             },
-           
+
             saveConfig() {
                 if (!this.config) {
                     const configFile = this.dir + "/docs.ai.config.json"
@@ -204,6 +213,7 @@
         },
 
         created () {
+            this.api = new SimpleGPT({ key: (ls as any)("apiKey") || '' })
             this.dir && this.updateFilesSync(this.dir)
         },
 

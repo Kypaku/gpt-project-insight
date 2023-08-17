@@ -1,7 +1,17 @@
 <template>
     <div>
         <b>Result: </b>
-        <div class="result text-sm mt-2 bg-yellow-50 p-2 rounded">
+        <div class="result-header flex-center-between  mt-2">
+            <div></div>
+            <!-- underline toggler "edit result / hide edit" -->
+            <button class="underline text-sm px-2 py-1 rounded-lg" @click="isEditing = !isEditing">
+                {{ isEditing ? 'Hide Edit' : 'Edit Result' }}
+            </button>
+        </div>
+        <div class="edit-result" v-if="isEditing">
+            <InputTextarea :value="content" @update:value="val => $emit('update:value', val)" />
+        </div>
+        <div class="result text-sm bg-yellow-50 p-2 rounded" ref="resultWrap" v-else>
             <template v-for="(segment, i) in segments">
                 <div :key="i" class="code-block mb-1" v-if="segment.isCode">
                     <pre class="overflow-auto max-h-80"><code v-html="highlightCode(segment.text.trim())"></code></pre>
@@ -28,7 +38,7 @@
 
 <script lang='ts'>
     import { defineComponent, PropType } from 'vue'
-
+    import InputTextarea from '../misc/InputTextarea.vue'
     import { StringIndexes, Action } from './ResultFiles.vue'
     import { openFile, sortByReverse } from '@/../helpers/node_gm'
     import { indexesOf } from '@/helpers'
@@ -36,6 +46,7 @@
     import 'prismjs/themes/prism-tomorrow.css'
     import path from 'path'
     import { copy } from '@/../helpers'
+    import { IFile } from 'types'
 
     export default defineComponent({
         props: {
@@ -45,19 +56,23 @@
             },
             content: String,
             files: {
-                type: Array as PropType<string[]>,
+                type: Array as PropType<IFile[]>,
                 default: () => []
             },
         },
         components: {
-
+            InputTextarea
         },
         data() {
             return {
+                isEditing: false,
 
             }
         },
         computed: {
+            escapedContent(): string {
+                return this.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            },
             actions(): Action[] {
                 return this.uniqMatchedFiles.map((matchedFile) => {
                     return {
@@ -68,17 +83,17 @@
                     }
                 })
             },
-            sortedFiles(): string[] {
-                return sortByReverse(this.files.filter((file) => file !== '.'), (f) => f.length)
+            sortedFiles(): IFile[] {
+                return sortByReverse(this.files.filter((file) => file !== '.'), (f) => f.path.length)
             },
             matchedFiles(): StringIndexes[] {
-                const content = this.content
+                const content = this.escapedContent
                 const res = []
                 this.sortedFiles.forEach((sortedFile) => {
-                    const indexes = indexesOf(content, sortedFile)
+                    const indexes = indexesOf(content, sortedFile.path)
                     if (indexes.length) {
                         res.push({
-                            string: sortedFile,
+                            string: sortedFile.path,
                             indexes
                         })
                     }
@@ -104,7 +119,7 @@
             },
             segments(): {isCode?: boolean, text: string}[] {
                 const divider = "`" + "`" + "`"
-                return this.content?.split(divider)?.map((dividerOne, i) => ({ isCode: !!(i % 2), text: dividerOne.trim() })) || []
+                return this.escapedContent?.split(divider)?.map((dividerOne, i) => ({ isCode: !!(i % 2), text: dividerOne.trim() })) || []
             },
         },
         methods: {
@@ -133,7 +148,7 @@
                 this.uniqMatchedFiles.forEach((matchedFile) => {
                     const fileRawPath = matchedFile.string
                     const filePath = path.resolve(this.dir, fileRawPath)
-                    const link = `<a href="#" class="underline" @click.prevent="openFile('${filePath}')">${fileRawPath}</a>`
+                    const link = `<a href="${filePath}" class="underline">${fileRawPath}</a>`
                     const replacers = [
                         fileRawPath,
                         fileRawPath.replaceAll('/', '\\'),
@@ -147,6 +162,15 @@
                         }
                     })
                 })
+                setTimeout(() => {
+                    this.$refs.resultWrap.querySelectorAll('a').forEach((link) => {
+                        link.addEventListener('click', (e) => {
+                            e.preventDefault()
+                            const filePath = link.getAttribute('href')
+                            openFile(filePath)
+                        })
+                    })
+                }, 0)
                 return text
             },
 

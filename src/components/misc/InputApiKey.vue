@@ -5,7 +5,7 @@
             v-model:value="apiKey"
             :error="!apiKey"
             label="API Key"
-            @update:value="val => ls('apiKey', val)"  />
+            @update:value="val => (ls('apiKey', val), $emit('update:value', val))"  />
     </div>
 </template>
 

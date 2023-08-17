@@ -39,4 +39,9 @@ export async function handleExternalRoutes(app: ComponentPublicInstance<{}, {}, 
             (app.$root.$refs.tabInsight as any).prompt = params.prompt
         }, 0)
     }
+    if (params.filesContent) {
+        setTimeout(() => {
+            (app.$root.$refs.tabInsight as any).includeFilesContent(params.filesContent.split(','))
+        }, 0)
+    }
 }

@@ -3,7 +3,7 @@
         <label :for="id" class="mr-2" v-if="label">{{label}}</label>
         <textarea
             type="text"
-            class="border-2 rounded p-1"
+            class="border-2 rounded p-1 w-full"
             ref="input"
             :id="id"
             :value="value"

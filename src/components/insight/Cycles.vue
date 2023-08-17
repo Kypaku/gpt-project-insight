@@ -1,10 +1,18 @@
 <template>
     <Accordeon class="cycles" title="Cycles">
+        <button
+            class="px-4 py-1 rounded mb-2 mr-2 btn-run"
+            :disabled="isLoading"
+            @click="run">
+            <b>{{isLoading ? 'Stop' : 'Run'}} <span v-show="loadingTime" class="font-normal" >
+                ({{ loadingTime.toFixed(1) }}s)</span>
+            </b>
+        </button>
         <List :items="filteredFiles">
             <template #default="{item, index}">
                 <div class="flex-center-between">
                     {{ index }}
-                    {{ item }}
+                    {{ item.path }}
                 </div>
             </template>
         </List>
@@ -12,6 +20,7 @@
 </template>
 
 <script lang='ts'>
+    import { filter } from 'lodash'
     import { defineComponent, PropType } from 'vue'
 
     import List from '@/components/misc/list/List.vue'
@@ -40,6 +49,8 @@
         // emits: ['update:modelValue'], this.$emit('update:modelValue', title)
         data() {
             return {
+                loadingTime: 0,
+                isLoading: false,
 
             }
         },
@@ -51,6 +62,20 @@
 
         },
         methods: {
+            run() {
+                this.isLoading = true
+                try {
+                    this.filterFiles.forEach((filterFile) => {
+                        // need to use api instance
+                    })
+                } catch (e) {
+                    console.error('Cycle run error:', e)
+                    const { toast } = require("vue3-toastify")
+                    toast.error('Cycle run error: ' + e.message)
+                } finally {
+                    this.isLoading = false
+                }
+            },
 
         },
     })

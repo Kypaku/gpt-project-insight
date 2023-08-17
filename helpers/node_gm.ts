@@ -100,6 +100,7 @@ export const splitBy = function(arr: any[], f: (el: any, local: any[]) => boolea
     let local: any[] = []
     g = g || ((el) => el)
     arr.forEach(el => {
+        // @ts-ignore
         local.push(el)
         if (f(el, local)) {
             res.push(g && g(local))

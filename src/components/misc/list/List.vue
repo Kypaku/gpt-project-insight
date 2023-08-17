@@ -1,5 +1,8 @@
 <template>
     <div class="list-comp flex flex-col items-center">
+        <div class="search pb-2 w-full" v-if="showSearch">
+            <input class="w-full py-1"  type="search" placeholder="Search" v-model="search"/>
+        </div>
         <div class="list-add-wrapper" v-if="$slots.add" v-show="!hideTopAdd">
             <slot name="add" :add="val => $emit('add', {name: val, pos: 0})" :index="0"/>
         </div>
@@ -10,7 +13,7 @@
             :placeholder="addPlaceholder"/>
         <Loader v-if="loading"/>
         <template v-else>
-            <template v-for="(item, i) in items" :key="i">
+            <template v-for="(item, i) in filteredItems" :key="i">
                 <slot
                     v-if="$slots.default"
                     :item="item"
@@ -44,9 +47,16 @@
     import ListAdd from "./ListAdd.vue"
     import ListAddLine from "./ListAddLine.vue"
     import Loader from "./Loader.vue"
+        import { localeIncludes } from "@/../helpers/node_gm"
 
     export default defineComponent({
         props: {
+            searchField: {
+                type: String,
+            },
+            showSearch: {
+                type: Boolean,
+            },
             addPlaceholder: {
                 type: String,
                 default: () => "Name"
@@ -67,10 +77,14 @@
         },
         data() {
             return {
+                search: '',
 
             }
         },
         computed: {
+            filteredItems(): any[] {
+                return this.items?.filter((item: any) => this.search ? localeIncludes(item[this.searchField || 'name'], this.search) : true)
+            },
 
         },
         methods: {

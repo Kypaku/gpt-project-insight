@@ -17,6 +17,7 @@ export interface InsightOptions {
     stream?: boolean
     fData?: any
     browser?: boolean
+    language?: string
 }
 
 export class Insight {
@@ -76,6 +77,7 @@ Use the format: file1, file2, ...
         ${(filesStr || contentStr) ? 'To answer' : ''}
         ${filesStr ? 'Use the list of files:\n' + filesStr : ''}
         ${contentStr ? 'Use the content:\n' + contentStr : ''}
+        ${opts?.language ? 'Use the language: ' + opts.language : ''}
         `
     }
 

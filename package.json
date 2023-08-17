@@ -17,7 +17,7 @@
     "commander": "^10.0.0",
     "core-js": "^3.6.5",
     "eventsource-parser": "^1.0.0",
-    "gpt-simple-api-ts": "^1.0.34",
+    "gpt-simple-api-ts": "^1.0.37",
     "https-browserify": "^1.0.0",
     "local-storage": "^2.0.0",
     "postcss": "^7.0.39",
