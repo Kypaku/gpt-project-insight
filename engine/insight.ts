@@ -13,11 +13,17 @@ export interface InsightOptions {
     maxTokensShift?: number
     timeout?: number
     maxTokensModel?: number
+    maxTokensAnswer?: number
     rawPrompt?: string
     stream?: boolean
     fData?: any
     browser?: boolean
     language?: string
+}
+
+export function getMaxTokens (promtL: number, opts: InsightOptions): number {
+    const maxTokens = Math.floor((opts?.maxTokensModel || 4097) - lengthToTokensCount(promtL) - (opts?.maxTokensShift || 300))
+    return opts?.maxTokensAnswer ? (maxTokens > opts.maxTokensAnswer ? opts.maxTokensAnswer : maxTokens) : maxTokens
 }
 
 export class Insight {
@@ -44,12 +50,12 @@ You need to ask me about descriptions or content of which exactly files you need
 Use the format: file1, file2, ...
 `
 // If you don't know which exactly files you need, you have to suggest.
-// If you don't have enough information, 
+// If you don't have enough information,
 // You need to decide whether you have enough information to answer the question or not.
 // If you have enough information, you can answer the question.
         // call the first prompt
-        console.log("insight.askFiles", {thePromptLength: lengthToTokensCount(thePrompt.length)})
-        const res = await getAnswer(thePrompt, {timeout: 120000, max_tokens: Math.floor((opts?.maxTokensModel || 4097) - lengthToTokensCount(thePrompt.length) - (opts?.maxTokensShift || 300)), ...opts})
+        console.log("insight.askFiles", { thePromptLength: lengthToTokensCount(thePrompt.length) })
+        const res = await getAnswer(thePrompt, { timeout: 120000, max_tokens: getMaxTokens(thePrompt.length, opts as InsightOptions), ...opts })
         return res || ''
     }
 
@@ -60,13 +66,15 @@ Use the format: file1, file2, ...
         }
 
         const thePrompt = opts?.rawPrompt || this.generatePrompt(prompt, opts)
-        console.log("insight.ask", {thePromptLength: lengthToTokensCount(thePrompt.length)})
+        console.log("insight.ask", { thePromptLength: lengthToTokensCount(thePrompt.length) })
         const res = this.getAnswer(thePrompt, opts)
         return res || ''
     }
 
     public async getAnswer(prompt: string, opts?: InsightOptions): Promise<string> {
-        return await getAnswer(prompt, {timeout: 120000, max_tokens: Math.floor((opts?.maxTokensModel || 4097) - lengthToTokensCount(prompt.length) - (opts?.maxTokensShift || 300)), ...opts})
+        const max_tokens = getMaxTokens(prompt.length, opts as InsightOptions)
+        console.log("getAnswer", { max_tokens })
+        return await getAnswer(prompt, { timeout: 120000, max_tokens, ...opts })
     }
 
     public generatePrompt(prompt: string, opts?: InsightOptions): string {
@@ -94,7 +102,7 @@ Use the format: file1, file2, ...
         this.isStopped = true
     }
 
-    //abort
+    // abort
     public abort(): void {
         gptAPI?.abortStream()
         gptAPIBrowser?.abortStream()

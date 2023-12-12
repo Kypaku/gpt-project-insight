@@ -71,7 +71,7 @@
         },
         computed: {
             escapedContent(): string {
-                return this.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                return this.content //.replace(/</g, '&lt;').replace(/>/g, '&gt;')
             },
             actions(): Action[] {
                 return this.uniqMatchedFiles.map((matchedFile) => {

@@ -21,6 +21,12 @@
                 @update:value="val => $emit('update:value', {...(config || defaultConfig), maxTokensModel: +val} )" />
             <InputText
                 class="mt-2"
+                label="Max Tokens Answer"
+                :value="(config as any)?.maxTokensAnswer || (defaultConfig as any).maxTokensAnswer"
+                :placeholder="(defaultConfig as any).maxTokensAnswer || 4097"
+                @update:value="val => $emit('update:value', {...(config || defaultConfig), maxTokensAnswer: +val} )" />
+            <InputText
+                class="mt-2"
                 label="Max Tokens File"
                 :value="(config as any)?.maxTokensFile || (defaultConfig as any).maxTokensFile"
                 :placeholder="(defaultConfig as any).maxTokensFile || 150"

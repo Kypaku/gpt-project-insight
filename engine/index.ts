@@ -7,6 +7,7 @@ import { getParentFolders, getUpdatedParentFolders } from "../helpers"
 export interface DocumentationGeneratorOptions {
     maxQueries?: number
     maxTokensModel?: number
+    maxTokensAnswer?: number
     apiKey?: string
     cli?: boolean
     maxTokens?: number
@@ -16,6 +17,7 @@ export interface DocumentationGeneratorOptions {
     temperature?: number
     model?: string
     timeout?: number
+    language?: string
 }
 export class DocumentationGenerator {
     private files: IFile[];

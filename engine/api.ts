@@ -28,6 +28,8 @@ export const getFileDescription = async (file: IFile, content: string, opts?: an
     const api = opts?.browser ? gptAPIBrowser : gptAPI
     const prompt = `Create a short description for the file ${file.path}:
     ${content}
+
+    ${opts?.language ? 'Use the language: ' + opts.language : ''}
     `
     const gptOpts = { max_tokens: opts?.maxTokens || 150, temperature: opts?.temperature || 0.01 } as any
     if (opts?.model) {
@@ -46,6 +48,8 @@ export const getFolderDescription = async (file: IFile, descriptions: IFileDescr
         ${descriptions.map(desc => `
         ${desc.fileName}: 
         ${desc.description}`).join("\n")}
+
+        ${opts?.language ? 'Use the language: ' + opts.language : ''}
     `
     const gptOpts = { max_tokens: opts?.maxTokens || 300, temperature: opts?.temperature || 0.01 } as any
     if (opts?.model) {
