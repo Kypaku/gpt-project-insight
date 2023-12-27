@@ -12,6 +12,7 @@
                 label="Model"
                 :value="(config as any)?.model || (defaultConfig as any).model"
                 :placeholder="(defaultConfig as any).model || 'gpt-3.5-turbo-0301'"
+                :suggestions="modelSuggestions"
                 @update:value="val => $emit('update:value', {...(config || defaultConfig), model: val} )" />
             <InputText
                 class="mt-2"
@@ -100,7 +101,7 @@
 <script lang='ts'>
     import { DocumentationGeneratorOptions } from 'engine'
     import { defineComponent, PropType } from 'vue'
-    import InputText from './misc/InputText.vue'
+    import InputText, { InputTextSuggestion } from './misc/InputText.vue'
     import Accordeon from './misc/Accordeon.vue'
     import ToggleSwitch from './misc/ToggleSwitch.vue'
     import ls from 'local-storage'
@@ -112,6 +113,10 @@
 
     export default defineComponent({
         props: {
+            models: {
+                type: Array as PropType<string[]>,
+                default: () => []
+            },
             config: {
                 type: Object as PropType<DocumentationGeneratorOptions & InsightOptions>,
                 default: () => null
@@ -136,6 +141,9 @@
             }
         },
         computed: {
+            modelSuggestions(): InputTextSuggestion[] {
+                return this.models.map(model => ({ value: model, name: model }))
+            },
 
         },
         methods: {

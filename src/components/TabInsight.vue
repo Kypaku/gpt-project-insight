@@ -4,7 +4,7 @@
         <ProjectsList/>
         <Examples @apply="val => (prompt = val)" />
         <b>Prompt</b>
-        <InputTextarea v-model:value="prompt" class="w-full" :rows="3"/>
+        <InputTextarea v-model:value="prompt" class="w-full" :rows="5"/>
         <button @click="setToDefault" class="underline text-sm" >Set to default</button>
         <ToggleSwitch class="mt-2" v-model:value="includeFiles" :label="`Include files (+${lengthToTokensCount(filesStr.length)} tokens)`" />
         <ToggleSwitch

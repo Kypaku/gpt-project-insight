@@ -24,6 +24,7 @@
             <Settings
                 class="mt-2 mb-2 w-1/2"
                 :defaultConfig="localStorageConfig"
+                :models="models"
                 :config="config"
                 @update:value="val => updateSettings(val)" />
             <div class="tabs w-full text-lg flex text-center mt-4 mb-4">
@@ -109,6 +110,7 @@
                 dir: ls("dir") as unknown as string || '',
                 ls,
                 api: null,
+                models: [] as string[],
             }
         },
         computed: {
@@ -215,6 +217,7 @@
         created () {
             this.api = new SimpleGPT({ key: (ls as any)("apiKey") || '' })
             this.dir && this.updateFilesSync(this.dir)
+            this.updateModels()
         },
 
         watch: {
